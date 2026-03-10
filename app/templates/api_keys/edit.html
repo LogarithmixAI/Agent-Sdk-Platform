@@ -1,0 +1,638 @@
+{% extends "base.html" %} {% block title %}Edit API Key - Agent SDK Platform{%
+endblock %} {% block extra_css %}
+<style>
+  .edit-header {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    padding: 60px 0;
+    color: white;
+    margin-bottom: 40px;
+  }
+
+  .edit-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 25px 0 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  .section-title:first-of-type {
+    margin-top: 0;
+  }
+
+  .key-id-display {
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4299e1;
+  }
+
+  .key-id-label {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 5px;
+  }
+
+  .key-id-value {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #2d3748;
+    word-break: break-all;
+  }
+
+  .permission-group {
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+
+  .permission-item {
+    padding: 8px;
+    transition: background 0.2s;
+  }
+
+  .permission-item:hover {
+    background: #edf2f7;
+    border-radius: 5px;
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 8px;
+  }
+
+  .form-control,
+  .form-select {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.3s;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    outline: none;
+  }
+
+  .help-text {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-top: 5px;
+  }
+
+  .domain-input,
+  .ip-input {
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+  }
+
+  .btn-save {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s;
+  }
+
+  .btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(66, 153, 225, 0.3);
+  }
+
+  .btn-cancel {
+    background: white;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+  }
+
+  .btn-cancel:hover {
+    background: #f7fafc;
+    border-color: #a0aec0;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .status-active {
+    background: #c6f6d5;
+    color: #22543d;
+  }
+
+  .status-inactive {
+    background: #fed7d7;
+    color: #742a2a;
+  }
+
+  .expiry-warning {
+    background: #feebc8;
+    border-left: 4px solid #dd6b20;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 15px 0;
+  }
+
+  .tab-container {
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    display: inline-block;
+    padding: 10px 20px;
+    color: #718096;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .tab:hover {
+    color: #4299e1;
+  }
+
+  .tab.active {
+    color: #4299e1;
+    border-bottom-color: #4299e1;
+    font-weight: 500;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+</style>
+{% endblock %} {% block content %}
+<!-- Header -->
+<section class="edit-header">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold mb-3">Edit API Key</h1>
+    <p class="lead mb-0">Modify your API key settings and permissions</p>
+  </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mb-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="edit-card">
+        <!-- Key ID Display -->
+        <div class="key-id-display">
+          <div class="key-id-label">
+            <i class="fas fa-fingerprint me-1"></i>
+            Key ID
+          </div>
+          <div class="key-id-value">{{ key.key_id }}</div>
+          <div class="d-flex mt-2">
+            <span
+              class="status-badge {% if key.is_active %}status-active{% else %}status-inactive{% endif %} me-2"
+            >
+              <i class="fas fa-circle me-1" style="font-size: 0.5rem"></i>
+              {{ 'Active' if key.is_active else 'Inactive' }}
+            </span>
+            {% if key.expires_at %}
+            <span
+              class="status-badge"
+              style="background: #e2e8f0; color: #2d3748"
+            >
+              <i class="fas fa-clock me-1"></i>
+              Expires: {{ key.expires_at.strftime('%Y-%m-%d') }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-container">
+          <span class="tab active" data-tab="basic">Basic Settings</span>
+          <span class="tab" data-tab="security">Security</span>
+          <span class="tab" data-tab="advanced">Advanced</span>
+        </div>
+
+        <!-- Edit Form -->
+        <form
+          method="POST"
+          action="{{ url_for('api_keys.edit_key', key_id=key.key_id) }}"
+        >
+          {{ form.hidden_tag() }}
+
+          <!-- Basic Settings Tab -->
+          <div class="tab-content active" id="tab-basic">
+            <!-- Key Name -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-tag me-2 text-primary"></i>
+                Key Name
+              </label>
+              {{ form.name(class="form-control", placeholder="e.g., Production
+              API Key") }} {% if form.name.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.name.errors %} {{ error }} {% endfor %}
+              </div>
+              {% endif %}
+              <div class="help-text">
+                A descriptive name to help you identify this key's purpose
+              </div>
+            </div>
+
+            <!-- ✅ ADD DESCRIPTION FIELD HERE -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-align-left me-2 text-primary"></i>
+                Description
+              </label>
+              {{ form.description(class="form-control", rows=2,
+              placeholder="Optional description for this key") }} {% if
+              form.description.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.description.errors %} {{ error }} {% endfor
+                %}
+              </div>
+              {% endif %}
+              <div class="help-text">
+                A brief description to remember what this key is used for
+              </div>
+            </div>
+
+            <!-- Key Status -->
+            <div class="mb-4">
+              <label class="form-label">
+                <i class="fas fa-power-off me-2 text-primary"></i>
+                Key Status
+              </label>
+              <div class="form-check form-switch">
+                {{ form.is_active(class="form-check-input", role="switch") }}
+                <label class="form-check-label">
+                  {{ form.is_active.label.text }}
+                </label>
+              </div>
+              <div class="help-text">
+                Deactivate to temporarily disable this key without deleting it
+              </div>
+            </div>
+
+            <!-- Permissions Section -->
+            <div class="section-title">
+              <i class="fas fa-lock me-2 text-primary"></i>
+              Permissions
+            </div>
+
+            <div class="permission-group">
+              <p class="text-muted small mb-3">Select what this key can do:</p>
+              <div class="row">
+                {% for subfield in form.permissions %}
+                <div class="col-md-6">
+                  <div class="permission-item">
+                    <div class="form-check">
+                      {{ subfield(class="form-check-input") }}
+                      <label class="form-check-label">
+                        {% if subfield.data == 'read_logs' %}
+                        <i class="fas fa-book-reader me-1 text-info"></i>
+                        {% elif subfield.data == 'write_logs' %}
+                        <i class="fas fa-pen me-1 text-success"></i>
+                        {% elif subfield.data == 'delete_logs' %}
+                        <i class="fas fa-trash me-1 text-danger"></i>
+                        {% elif subfield.data == 'manage_webhooks' %}
+                        <i class="fas fa-webhook me-1 text-warning"></i>
+                        {% elif subfield.data == 'view_analytics' %}
+                        <i class="fas fa-chart-bar me-1 text-purple"></i>
+                        {% elif subfield.data == 'admin' %}
+                        <i class="fas fa-crown me-1 text-warning"></i>
+                        {% endif %} {{ subfield.label.text }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% for error in form.permissions.errors %}
+              <div class="text-danger small mt-2">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Security Tab -->
+          <div class="tab-content" id="tab-security">
+            <!-- Domain Restrictions -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-globe me-2 text-primary"></i>
+                Allowed Domains
+              </label>
+              {{ form.allowed_domains(class="form-control", rows=3,
+              placeholder="example.com") }} {% if form.allowed_domains.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.allowed_domains.errors %} {{ error }} {%
+                endfor %}
+              </div>
+              {% endif %}
+              <div class="help-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Restrict this key to specific domains (one per line). Supports
+                wildcards (e.g., *.example.com)
+              </div>
+
+              <div class="domain-input mt-2">
+                <small class="text-muted">Examples:</small>
+                <code class="d-block mt-1">example.com</code>
+                <code>*.example.com</code>
+                <code>api.example.com</code>
+                <code>localhost:3000</code>
+              </div>
+            </div>
+
+            <!-- IP Whitelist -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-network-wired me-2 text-primary"></i>
+                IP Whitelist
+              </label>
+              {{ form.ip_whitelist(class="form-control", rows=3,
+              placeholder="192.168.1.100") }} {% if form.ip_whitelist.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.ip_whitelist.errors %} {{ error }} {%
+                endfor %}
+              </div>
+              {% endif %}
+              <div class="help-text">
+                <i class="fas fa-info-circle me-1"></i>
+                Restrict this key to specific IP addresses (one per line).
+                Supports CIDR notation.
+              </div>
+
+              <div class="ip-input mt-2">
+                <small class="text-muted">Examples:</small>
+                <code class="d-block mt-1">192.168.1.100</code>
+                <code>10.0.0.0/24</code>
+                <code>203.0.113.0/24</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advanced Tab -->
+          <div class="tab-content" id="tab-advanced">
+            <!-- Rate Limit -->
+            <div class="mb-3">
+              <label class="form-label">
+                <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+                Rate Limit
+              </label>
+              {{ form.rate_limit(class="form-select") }} {% if
+              form.rate_limit.errors %}
+              <div class="text-danger small mt-1">
+                {% for error in form.rate_limit.errors %} {{ error }} {% endfor
+                %}
+              </div>
+              {% endif %}
+              <div class="help-text">Maximum number of requests per minute</div>
+            </div>
+
+            <!-- Key Metadata -->
+            <div class="section-title">
+              <i class="fas fa-chart-line me-2 text-primary"></i>
+              Key Statistics
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded text-center">
+                  <div class="small text-muted">Total Requests</div>
+                  <div class="h4 mb-0">{{ key.total_requests or 0 }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded text-center">
+                  <div class="small text-muted">Last Used</div>
+                  <div class="h6 mb-0">
+                    {% if key.last_used_at %} {{
+                    key.last_used_at.strftime('%Y-%m-%d %H:%M') }} {% else %}
+                    Never {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded text-center">
+                  <div class="small text-muted">Created</div>
+                  <div class="h6 mb-0">
+                    {{ key.created_at.strftime('%Y-%m-%d') if key.created_at
+                    else 'N/A' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="section-title text-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Danger Zone
+            </div>
+
+            <div
+              class="warning-box p-3 rounded"
+              style="background: #fff5f5; border: 1px solid #fc8181"
+            >
+              <div class="d-flex align-items-center mb-3">
+                <i class="fas fa-exclamation-circle text-danger fs-4 me-3"></i>
+                <div>
+                  <strong>Need to revoke this key?</strong>
+                  <p class="mb-0 small text-muted">
+                    Revoking permanently disables the key and cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <a
+                href="{{ url_for('api_keys.revoke_key', key_id=key.key_id) }}"
+                class="btn btn-outline-danger btn-sm w-100"
+              >
+                <i class="fas fa-ban me-2"></i>Revoke Key Instead
+              </a>
+            </div>
+
+            {% if key.expires_at and key.expires_at < now %}
+            <div class="expiry-warning mt-3">
+              <i class="fas fa-clock me-2"></i>
+              <strong>This key has expired.</strong> You can extend it by
+              setting a new expiration date.
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Form Actions -->
+          <div class="row g-3 mt-4">
+            <div class="col-md-6">
+              <a
+                href="{{ url_for('api_keys.manage_keys') }}"
+                class="btn-cancel"
+              >
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
+            </div>
+            <div class="col-md-6">
+              <button type="submit" class="btn-save">
+                <i class="fas fa-save me-2"></i>Save Changes
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Help Section -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="alert alert-info d-flex align-items-center">
+            <i class="fas fa-info-circle fs-4 me-3"></i>
+            <div>
+              <strong>Need help with permissions?</strong>
+              <p class="mb-0 small">
+                Check our
+                <a
+                  href="{{ url_for('documentation.index', page='api-keys') }}"
+                  class="alert-link"
+                  >API keys documentation</a
+                >
+                for detailed information about each permission level.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Tab switching
+    const tabs = document.querySelectorAll(".tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", function () {
+        // Remove active class from all tabs
+        tabs.forEach((t) => t.classList.remove("active"));
+
+        // Add active class to clicked tab
+        this.classList.add("active");
+
+        // Hide all tab contents
+        tabContents.forEach((content) => content.classList.remove("active"));
+
+        // Show selected tab content
+        const tabName = this.dataset.tab;
+        document.getElementById(`tab-${tabName}`).classList.add("active");
+      });
+    });
+
+    // Permission selection helper
+    const selectAllCheckbox = document.getElementById("select-all");
+    if (selectAllCheckbox) {
+      selectAllCheckbox.addEventListener("change", function () {
+        const checkboxes = document.querySelectorAll(
+          'input[name="permissions"]',
+        );
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+      });
+    }
+
+    // Confirm before leaving with unsaved changes
+    let formChanged = false;
+    const form = document.querySelector("form");
+    const formInputs = form.querySelectorAll("input, select, textarea");
+
+    formInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        formChanged = true;
+      });
+    });
+
+    window.addEventListener("beforeunload", function (e) {
+      if (formChanged) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+      }
+    });
+
+    form.addEventListener("submit", function () {
+      formChanged = false;
+    });
+
+    // Validate domain input
+    document
+      .querySelector('textarea[name="allowed_domains"]')
+      .addEventListener("input", function () {
+        const domains = this.value.split("\n").filter((d) => d.trim());
+        const invalidDomains = domains.filter((d) => !isValidDomain(d.trim()));
+
+        if (invalidDomains.length > 0) {
+          this.classList.add("is-invalid");
+        } else {
+          this.classList.remove("is-invalid");
+        }
+      });
+
+    function isValidDomain(domain) {
+      if (!domain) return true;
+      const pattern =
+        /^([a-zA-Z0-9][a-zA-Z0-9-_.]*\.)?[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}$|^\*?\.[a-zA-Z0-9][a-zA-Z0-9-]*\.[a-zA-Z]{2,}$|^localhost(:\d+)?$/;
+      return pattern.test(domain);
+    }
+
+    // Validate IP input
+    document
+      .querySelector('textarea[name="ip_whitelist"]')
+      .addEventListener("input", function () {
+        const ips = this.value.split("\n").filter((ip) => ip.trim());
+        const invalidIps = ips.filter((ip) => !isValidIp(ip.trim()));
+
+        if (invalidIps.length > 0) {
+          this.classList.add("is-invalid");
+        } else {
+          this.classList.remove("is-invalid");
+        }
+      });
+
+    function isValidIp(ip) {
+      if (!ip) return true;
+      const ipv4Pattern = /^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$/;
+      return ipv4Pattern.test(ip);
+    }
+  });
+</script>
+{% endblock %}

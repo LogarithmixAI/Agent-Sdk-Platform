@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Two-Factor Authentication - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .twofa-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .twofa-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 40px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .twofa-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+    
+    .twofa-icon i {
+        font-size: 40px;
+        color: white;
+    }
+    
+    .twofa-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 10px;
+        color: #2d3748;
+    }
+    
+    .twofa-subtitle {
+        text-align: center;
+        color: #718096;
+        margin-bottom: 30px;
+    }
+    
+    .otp-inputs {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 30px 0;
+    }
+    
+    .otp-input {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .otp-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .btn-verify {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .btn-verify:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .backup-link {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    
+    .backup-link:hover {
+        text-decoration: underline;
+    }
+    
+    .info-box {
+        background: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="twofa-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Two-Factor Authentication</h1>
+        <p class="lead mb-0">Enter the verification code from your authenticator app</p>
+    </div>
+</section>
+
+<!-- 2FA Form -->
+<div class="container mb-5">
+    <div class="twofa-card">
+        
+        <!-- Icon -->
+        <div class="twofa-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        
+        <h2 class="twofa-title">Verification Required</h2>
+        <p class="twofa-subtitle">Open your authenticator app and enter the 6-digit code</p>
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Info Box -->
+        <div class="info-box">
+            <i class="fas fa-info-circle me-2 text-primary"></i>
+            <strong>Using Google Authenticator, Authy, or similar?</strong>
+            <p class="mb-0 mt-2 small">Open the app on your phone to get the verification code.</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.two_factor') }}" id="twofaForm">
+            {{ form.hidden_tag() }}
+            
+            <!-- OTP Input Boxes -->
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" id="otp1" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus>
+                <input type="text" class="otp-input" id="otp2" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp3" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp4" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp5" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp6" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+            
+            <!-- Hidden input for full OTP -->
+            <input type="hidden" name="token" id="fullOtp">
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn-verify" id="verifyBtn">
+                <i class="fas fa-check-circle me-2"></i>Verify & Continue
+            </button>
+        </form>
+        
+        <!-- Backup Options -->
+        <div class="text-center mt-4">
+            <p class="mb-2">Having trouble?</p>
+            <a href="#" class="backup-link me-3" onclick="useBackupCode()">
+                <i class="fas fa-key me-1"></i>Use backup code
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="backup-link">
+                <i class="fas fa-sign-out-alt me-1"></i>Cancel login
+            </a>
+        </div>
+    </div>
+    
+    <!-- Help Card -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div class="card bg-light border-0">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-question-circle me-2 text-primary"></i>
+                        Need help with 2FA?
+                    </h6>
+                    <ul class="small mb-0">
+                        <li>Make sure your phone's time is synchronized (auto time zone)</li>
+                        <li>Codes refresh every 30 seconds - wait for next code if needed</li>
+                        <li>Use backup codes if you lost access to your authenticator app</li>
+                        <li><a href="{{ url_for('auth.two_factor_setup') }}">Reset 2FA</a> if you're having persistent issues</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// OTP input handling
+const otpInputs = document.querySelectorAll('.otp-input');
+const fullOtp = document.getElementById('fullOtp');
+const verifyBtn = document.getElementById('verifyBtn');
+
+// Auto-focus next input
+otpInputs.forEach((input, index) => {
+    input.addEventListener('input', function() {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+        
+        updateFullOtp();
+    });
+    
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && index > 0) {
+            otpInputs[index - 1].focus();
+        }
+    });
+    
+    // Paste handling
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = e.clipboardData.getData('text');
+        const numbers = paste.replace(/[^0-9]/g, '').split('');
+        
+        numbers.forEach((num, i) => {
+            if (i < otpInputs.length) {
+                otpInputs[i].value = num;
+            }
+        });
+        
+        if (numbers.length > 0) {
+            otpInputs[Math.min(numbers.length, otpInputs.length - 1)].focus();
+        }
+        
+        updateFullOtp();
+    });
+});
+
+function updateFullOtp() {
+    let otp = '';
+    otpInputs.forEach(input => otp += input.value);
+    fullOtp.value = otp;
+    
+    // Auto-submit when all 6 digits entered
+    if (otp.length === 6) {
+        verifyBtn.click();
+    }
+}
+
+// Use backup code (simple prompt for now)
+function useBackupCode() {
+    const backupCode = prompt('Enter your backup code:');
+    if (backupCode && backupCode.length === 8) {
+        // You can implement backup code verification here
+        alert('Verifying backup code...');
+        // fullOtp.value = backupCode;
+        // verifyBtn.click();
+    } else if (backupCode) {
+        alert('Invalid backup code format. Should be 8 characters.');
+    }
+}
+
+// Prevent form submit on Enter (use button click instead)
+document.getElementById('twofaForm').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        verifyBtn.click();
+    }
+});
+
+// Auto-focus first input on load
+window.onload = function() {
+    otpInputs[0].focus();
+};
+</script>
+{% endblock %}

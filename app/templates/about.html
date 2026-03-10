@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 100px 0;
+        color: white;
+    }
+    
+    .story-section {
+        padding: 80px 0;
+    }
+    
+    .story-content {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    
+    .story-content p {
+        font-size: 1.2rem;
+        line-height: 1.8;
+        color: #4a5568;
+        margin-bottom: 30px;
+    }
+    
+    .values-section {
+        background: #f7fafc;
+        padding: 80px 0;
+    }
+    
+    .value-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.1);
+    }
+    
+    .value-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .value-icon i {
+        font-size: 30px;
+        color: white;
+    }
+    
+    .value-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #2d3748;
+    }
+    
+    .team-section {
+        padding: 80px 0;
+    }
+    
+    .team-card {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .team-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 48px;
+        font-weight: 600;
+    }
+    
+    .team-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #2d3748;
+    }
+    
+    .team-role {
+        color: #718096;
+        margin-bottom: 10px;
+    }
+    
+    .milestone-section {
+        background: white;
+        padding: 60px 0;
+    }
+    
+    .milestone-item {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .milestone-year {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 10px;
+    }
+    
+    .milestone-desc {
+        color: #4a5568;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="about-header">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Our Mission: Make Observability Simple</h1>
+        <p class="lead mb-0">We're building the future of application monitoring</p>
+    </div>
+</section>
+
+<!-- Story -->
+<section class="story-section">
+    <div class="container">
+        <div class="story-content">
+            <h2 class="display-5 fw-bold mb-4">Our Story</h2>
+            <p>Agent SDK was founded in 2023 by a team of developers who were frustrated with existing monitoring tools. We believed there had to be a better way to track logs and analyze application performance without the complexity and high costs of traditional solutions.</p>
+            <p>What started as a simple internal tool quickly grew into a full-fledged platform used by thousands of companies worldwide. Today, Agent SDK processes over 10 million events daily, helping developers build better, more reliable applications.</p>
+            <p>Our team is distributed across the globe, united by a common mission: to make observability simple, powerful, and accessible to every developer.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Values -->
+<section class="values-section">
+    <div class="container">
+        <h2 class="text-center display-5 fw-bold mb-5">Our Core Values</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="value-title">Customer First</h3>
+                    <p class="text-muted">Every decision we make starts with our customers' needs. Your success is our success.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="value-title">Innovation</h3>
+                    <p class="text-muted">We're constantly pushing boundaries to find better, simpler solutions to complex problems.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="value-title">Transparency</h3>
+                    <p class="text-muted">We believe in being open and honest with our customers, our community, and each other.</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="value-title">Security</h3>
+                    <p class="text-muted">Your data's security is our top priority. We never compromise on safety.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Milestones -->
+<section class="milestone-section">
+    <div class="container">
+        <h2 class="text-center display-5 fw-bold mb-5">Our Journey</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="milestone-item">
+                    <div class="milestone-year">2023</div>
+                    <div class="milestone-desc">Company founded</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="milestone-item">
+                    <div class="milestone-year">2024</div>
+                    <div class="milestone-desc">First 100 customers</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="milestone-item">
+                    <div class="milestone-year">2025</div>
+                    <div class="milestone-desc">10M events/day</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="milestone-item">
+                    <div class="milestone-year">2026</div>
+                    <div class="milestone-desc">Global team of 50+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="team-section">
+    <div class="container">
+        <h2 class="text-center display-5 fw-bold mb-5">Meet Our Leadership</h2>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <span>JD</span>
+                    </div>
+                    <h3 class="team-name">John Doe</h3>
+                    <p class="team-role">CEO & Co-founder</p>
+                    <div>
+                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <span>JS</span>
+                    </div>
+                    <h3 class="team-name">Jane Smith</h3>
+                    <p class="team-role">CTO & Co-founder</p>
+                    <div>
+                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <span>MJ</span>
+                    </div>
+                    <h3 class="team-name">Mike Johnson</h3>
+                    <p class="team-role">Head of Engineering</p>
+                    <div>
+                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="team-card">
+                    <div class="team-avatar">
+                        <span>SW</span>
+                    </div>
+                    <h3 class="team-name">Sarah Wilson</h3>
+                    <p class="team-role">Head of Product</p>
+                    <div>
+                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">Join us on our mission</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-rocket me-2"></i>Get Started
+        </a>
+    </div>
+</section>
+{% endblock %}

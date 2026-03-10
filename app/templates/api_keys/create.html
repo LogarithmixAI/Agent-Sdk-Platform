@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Create API Key - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .permission-group {
+        border: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .permission-item {
+        margin-bottom: 0.5rem;
+    }
+    .permission-item:last-child {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Create New API Key</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('api_keys.create_key') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Basic Information -->
+                        <h5 class="mb-3">Basic Information</h5>
+                        
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% for error in form.name.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Give your key a descriptive name (e.g., "Production", "Development")</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label(class="form-label") }}
+                            {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=3) }}
+                            {% for error in form.description.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Optional: Add a description to remember what this key is for</small>
+                        </div>
+                        
+                        <!-- Permissions -->
+                        <h5 class="mb-3 mt-4">Permissions</h5>
+                        <div class="permission-group">
+                            <p class="text-muted small mb-3">Select the permissions this API key should have:</p>
+                            {% for subfield in form.permissions %}
+                                <div class="permission-item">
+                                    <div class="form-check">
+                                        {{ subfield(class="form-check-input") }}
+                                        {{ subfield.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% for error in form.permissions.errors %}
+                                <div class="text-danger small mt-2">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Security Settings -->
+                        <h5 class="mb-3 mt-4">Security Settings</h5>
+                        
+                        <div class="mb-3">
+                            {{ form.allowed_domains.label(class="form-label") }}
+                            {{ form.allowed_domains(class="form-control" + (" is-invalid" if form.allowed_domains.errors else ""), rows=3) }}
+                            {% for error in form.allowed_domains.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">
+                                Restrict this key to specific domains (one per line). 
+                Leave empty to allow all domains. Supports wildcards (e.g., *.example.com)
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.ip_whitelist.label(class="form-label") }}
+                            {{ form.ip_whitelist(class="form-control" + (" is-invalid" if form.ip_whitelist.errors else ""), rows=3) }}
+                            {% for error in form.ip_whitelist.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">
+                                Restrict this key to specific IP addresses (one per line). 
+                                Supports CIDR notation (e.g., 192.168.1.0/24)
+                            </small>
+                        </div>
+                        
+                        <!-- Rate Limiting -->
+                        <h5 class="mb-3 mt-4">Rate Limiting</h5>
+                        
+                        <div class="mb-3">
+                            {{ form.rate_limit.label(class="form-label") }}
+                            {{ form.rate_limit(class="form-select" + (" is-invalid" if form.rate_limit.errors else "")) }}
+                            {% for error in form.rate_limit.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Maximum number of requests per minute</small>
+                        </div>
+                        
+                        <!-- Expiration -->
+                        <h5 class="mb-3 mt-4">Expiration</h5>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.never_expire(class="form-check-input") }}
+                            {{ form.never_expire.label(class="form-check-label") }}
+                        </div>
+                        
+                        <div class="mb-3" id="expirationDateField" style="display: none;">
+                            {{ form.expires_at.label(class="form-label") }}
+                            {{ form.expires_at(class="form-control" + (" is-invalid" if form.expires_at.errors else "")) }}
+                            {% for error in form.expires_at.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <small class="text-muted">Set an expiration date for this key</small>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> The key secret will only be shown once after creation. 
+                            Make sure to save it in a secure location.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('api_keys.manage_keys') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-key me-2"></i>Generate API Key
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+// Show/hide expiration date field
+document.getElementById('never_expire').addEventListener('change', function() {
+    document.getElementById('expirationDateField').style.display = 
+        this.checked ? 'none' : 'block';
+});
+
+// Initialize date picker
+flatpickr('#expires_at', {
+    enableTime: true,
+    minDate: 'today',
+    dateFormat: 'Y-m-d H:i',
+    altInput: true,
+    altFormat: 'F j, Y H:i'
+});
+
+// Select/deselect all permissions (optional enhancement)
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add "Select All" functionality here if needed
+});
+</script>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Features - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .feature-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0;
+        color: white;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+    }
+    
+    .feature-icon-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 25px;
+    }
+    
+    .feature-icon-large i {
+        font-size: 40px;
+        color: white;
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #2d3748;
+    }
+    
+    .feature-description {
+        color: #718096;
+        line-height: 1.7;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+    }
+    
+    .feature-list li {
+        padding: 8px 0;
+        color: #4a5568;
+    }
+    
+    .feature-list i {
+        color: #48bb78;
+        margin-right: 10px;
+    }
+    
+    .integration-section {
+        background: #f7fafc;
+        padding: 60px 0;
+    }
+    
+    .integration-logo {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .integration-logo i {
+        font-size: 48px;
+        color: #667eea;
+    }
+    
+    .integration-logo span {
+        display: block;
+        margin-top: 10px;
+        font-weight: 500;
+        color: #2d3748;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="feature-header">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-4">Powerful Features for Modern Applications</h1>
+        <p class="lead mb-0">Everything you need to monitor, debug, and optimize your applications</p>
+    </div>
+</section>
+
+<!-- Main Features -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time Tracking</h3>
+                    <p class="feature-description">Monitor logs as they happen with sub-second latency. Get instant visibility into errors and performance issues.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Live log streaming</li>
+                        <li><i class="fas fa-check-circle"></i> Instant alerts</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time dashboards</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="feature-description">Deep insights into user behavior and system performance with interactive dashboards.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Custom charts</li>
+                        <li><i class="fas fa-check-circle"></i> Trend analysis</li>
+                        <li><i class="fas fa-check-circle"></i> User journeys</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="feature-title">Multi-language SDK</h3>
+                    <p class="feature-description">Easy integration with all major frameworks and languages.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> JavaScript/TypeScript</li>
+                        <li><i class="fas fa-check-circle"></i> Python/Django/Flask</li>
+                        <li><i class="fas fa-check-circle"></i> React/Vue/Angular</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title">Team Collaboration</h3>
+                    <p class="feature-description">Share insights and work together seamlessly with your team.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Role-based access</li>
+                        <li><i class="fas fa-check-circle"></i> Shared dashboards</li>
+                        <li><i class="fas fa-check-circle"></i> Team analytics</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Enterprise Security</h3>
+                    <p class="feature-description">Bank-level security for your data with compliance standards.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> SOC2 compliant</li>
+                        <li><i class="fas fa-check-circle"></i> GDPR ready</li>
+                        <li><i class="fas fa-check-circle"></i> End-to-end encryption</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon-large">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Alerts</h3>
+                    <p class="feature-description">Get notified about critical issues before they affect users.</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Custom alert rules</li>
+                        <li><i class="fas fa-check-circle"></i> Multiple channels</li>
+                        <li><i class="fas fa-check-circle"></i> Intelligent grouping</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Integrations -->
+<section class="integration-section">
+    <div class="container">
+        <h2 class="text-center mb-5">Seamless Integrations</h2>
+        <div class="row">
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-js"></i>
+                    <span>JavaScript</span>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-python"></i>
+                    <span>Python</span>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-react"></i>
+                    <span>React</span>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-vuejs"></i>
+                    <span>Vue.js</span>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-angular"></i>
+                    <span>Angular</span>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="integration-logo">
+                    <i class="fab fa-node"></i>
+                    <span>Node.js</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to experience these features?</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg px-5">
+            <i class="fas fa-rocket me-2"></i>Get Started Free
+        </a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,615 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} - Team Logs{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<style>
+    .team-logs-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 30px 0;
+        color: white;
+        margin-bottom: 30px;
+    }
+    
+    .team-stats-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .member-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    
+    .member-badge.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .member-badge.inactive {
+        background: #f8f9fa;
+        color: #6c757d;
+        border-color: #dee2e6;
+    }
+    
+    .member-badge.inactive:hover {
+        background: #e9ecef;
+    }
+    
+    .log-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .log-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .user-avatar-sm {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-box {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .severity-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .severity-high { background-color: #dc3545; color: white; }
+    .severity-medium { background-color: #ffc107; color: black; }
+    .severity-low { background-color: #28a745; color: white; }
+    .severity-info { background-color: #17a2b8; color: white; }
+    
+    .log-detail-modal .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    pre {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="team-logs-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2">
+                    <i class="fas fa-users me-2"></i>
+                    {{ team.name }} - Team Logs
+                </h1>
+                <p class="mb-0">
+                    <i class="fas fa-user me-1"></i> {{ team.owner.username }} (Owner)
+                    <i class="fas fa-users ms-3 me-1"></i> {{ members|length }} members
+                </p>
+            </div>
+            <div>
+                <a href="{{ url_for('team.view', public_id=team.public_id) }}" 
+                   class="btn btn-light">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Team
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Left Sidebar - Team Info & Filters -->
+        <div class="col-md-3">
+            <!-- Team Stats -->
+            <div class="team-stats-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-chart-pie me-2 text-primary"></i>
+                    Team Statistics
+                </h5>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats.total_logs }}</div>
+                            <div class="stat-label">Total Logs</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats.last_24h }}</div>
+                            <div class="stat-label">Last 24h</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats.active_sources }}</div>
+                            <div class="stat-label">Active Sources</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ stats.avg_daily }}</div>
+                            <div class="stat-label">Daily Avg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Members Filter -->
+            <div class="team-stats-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-users me-2 text-primary"></i>
+                    Filter by Member
+                </h5>
+                <div class="mb-3">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="memberFilter" 
+                               id="filterAll" value="all" checked>
+                        <label class="form-check-label fw-bold" for="filterAll">
+                            All Team Members
+                        </label>
+                    </div>
+                    <hr>
+                    {% for member in members %}
+                    <div class="form-check mb-2">
+                        <input class="form-check-input member-radio" type="radio" 
+                               name="memberFilter" id="filter{{ member.user.id }}" 
+                               value="{{ member.user.public_id }}">
+                        <label class="form-check-label d-flex align-items-center" 
+                               for="filter{{ member.user.id }}">
+                            <span class="user-avatar-sm me-2">
+                                {{ member.user.username[:2].upper() }}
+                            </span>
+                            <div>
+                                <strong>{{ member.user.username }}</strong>
+                                <small class="text-muted d-block">
+                                    {{ member.role|title }}
+                                </small>
+                            </div>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Quick Filters -->
+            <div class="team-stats-card">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-filter me-2 text-primary"></i>
+                    Quick Filters
+                </h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-danger btn-sm text-start" 
+                            onclick="filterBySeverity('HIGH')">
+                        <i class="fas fa-exclamation-circle me-2"></i>High Severity
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm text-start" 
+                            onclick="filterBySeverity('MEDIUM')">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Medium Severity
+                    </button>
+                    <button class="btn btn-outline-success btn-sm text-start" 
+                            onclick="filterBySeverity('LOW')">
+                        <i class="fas fa-info-circle me-2"></i>Low Severity
+                    </button>
+                    <hr>
+                    <button class="btn btn-outline-primary btn-sm text-start" 
+                            onclick="filterByType('ERROR')">
+                        <i class="fas fa-bug me-2"></i>Errors Only
+                    </button>
+                    <button class="btn btn-outline-info btn-sm text-start" 
+                            onclick="filterByType('INCOMING_REQUEST')">
+                        <i class="fas fa-globe me-2"></i>API Requests
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content - Logs Table -->
+        <div class="col-md-9">
+            <!-- Date Range Filter -->
+            <div class="filter-section">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Date Range</label>
+                        <select class="form-select" id="dateRange">
+                            <option value="1">Last 24 Hours</option>
+                            <option value="7" selected>Last 7 Days</option>
+                            <option value="30">Last 30 Days</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Project</label>
+                        <select class="form-select" id="projectFilter">
+                            <option value="">All Projects</option>
+                            {% for project in stats.projects %}
+                            <option value="{{ project }}">{{ project }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Environment</label>
+                        <select class="form-select" id="environmentFilter">
+                            <option value="">All Environments</option>
+                            {% for env in stats.environments %}
+                            <option value="{{ env }}">{{ env }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="applyFilters()">
+                            <i class="fas fa-filter me-2"></i>Apply
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Custom Date Range (hidden by default) -->
+                <div class="row mt-3" id="customDateRange" style="display: none;">
+                    <div class="col-md-5">
+                        <label class="form-label">Start Date</label>
+                        <input type="datetime-local" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label">End Date</label>
+                        <input type="datetime-local" class="form-control" id="endDate">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Filters Display -->
+            <div class="mb-3" id="activeFilters"></div>
+            
+            <!-- Logs Table -->
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2 text-primary"></i>
+                        Team Logs
+                    </h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="refreshLogs()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <button class="btn btn-sm btn-outline-success ms-2" onclick="exportLogs()">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover" id="logsTable">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Timestamp</th>
+                                <th>Project</th>
+                                <th>Environment</th>
+                                <th>Event Type</th>
+                                <th>Severity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation" class="mt-3">
+                        <ul class="pagination justify-content-center" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Log Detail Modal -->
+<div class="modal fade" id="logDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-file-alt me-2 text-primary"></i>
+                    Log Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body log-detail-modal">
+                <div id="logDetailContent"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<script>
+let currentPage = 1;
+let totalPages = 1;
+let currentFilters = {
+    member: 'all',
+    project: '',
+    environment: '',
+    severity: '',
+    event_type: '',
+    days: 7
+};
+
+const teamId = '{{ team.public_id }}';
+const teamMembers = {
+    {% for member in members %}
+    '{{ member.user.public_id }}': '{{ member.user.username }}',
+    {% endfor %}
+    'owner': '{{ team.owner.username }}'
+};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadLogs();
+    
+    // Date range change handler
+    document.getElementById('dateRange').addEventListener('change', function() {
+        const customRange = document.getElementById('customDateRange');
+        customRange.style.display = this.value === 'custom' ? 'flex' : 'none';
+    });
+    
+    // Member filter change handler
+    document.querySelectorAll('.member-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            currentFilters.member = this.value;
+            loadLogs(1);
+        });
+    });
+});
+
+function loadLogs(page = 1) {
+    currentPage = page;
+    
+    // Build query params
+    const params = new URLSearchParams({
+        team: teamId,
+        page: page,
+        per_page: 50,
+        days: currentFilters.days
+    });
+    
+    if (currentFilters.member !== 'all') {
+        params.append('member', currentFilters.member);
+    }
+    if (currentFilters.project) {
+        params.append('project', currentFilters.project);
+    }
+    if (currentFilters.environment) {
+        params.append('environment', currentFilters.environment);
+    }
+    if (currentFilters.severity) {
+        params.append('severity', currentFilters.severity);
+    }
+    if (currentFilters.event_type) {
+        params.append('event_type', currentFilters.event_type);
+    }
+    
+    // Date filters
+    const dateRange = document.getElementById('dateRange').value;
+    if (dateRange === 'custom') {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+    } else {
+        params.append('days', dateRange);
+    }
+    
+    fetch(`/team/api/team-logs?${params.toString()}`)
+        .then(r => r.json())
+        .then(data => {
+            displayLogs(data.logs);
+            updatePagination(data.page, data.total_pages);
+            updateActiveFilters();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('logsTableBody').innerHTML = 
+                '<tr><td colspan="7" class="text-center py-4 text-danger">Error loading logs</td></tr>';
+        });
+}
+
+function displayLogs(logs) {
+    const tbody = document.getElementById('logsTableBody');
+    
+    if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">No logs found</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    logs.forEach(log => {
+        const events = log.events || [];
+        const firstEvent = events[0] || {};
+        const severity = firstEvent.event?.severity || 'INFO';
+        const severityClass = `severity-${severity.toLowerCase()}`;
+        console.log(log)
+        // Get username from log metadata or teamMembers
+        const username =  teamMembers[log.user_id] || 'Unknown';
+        
+        html += `
+            <tr class="log-row" onclick="viewLogDetail('${log._id}')">
+                <td>
+                    <div class="d-flex align-items-center">
+                        <span class="user-avatar-sm me-2">${username.slice(0,2).toUpperCase()}</span>
+                        <span>${username}</span>
+                    </div>
+                </td>
+                <td>${formatDate(log.received_at)}</td>
+                <td>${log.batch_meta.project || '-'}</td>
+                <td><span class="badge bg-secondary">${log.batch_meta.environment || 'unknown'}</span></td>
+                <td>${firstEvent.event?.type || '-'}</td>
+                <td><span class="severity-badge ${severityClass}">${severity}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" 
+                            onclick="event.stopPropagation(); viewLogDetail('${log._id}')">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function viewLogDetail(logId) {
+    fetch(`/team/api/log/${logId}`)
+        .then(r => r.json())
+        .then(log => {
+            const content = document.getElementById('logDetailContent');
+            content.innerHTML = '<pre>' + JSON.stringify(log, null, 2) + '</pre>';
+            
+            const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+            modal.show();
+        });
+}
+
+function filterBySeverity(severity) {
+    currentFilters.severity = currentFilters.severity === severity ? '' : severity;
+    loadLogs(1);
+}
+
+function filterByType(type) {
+    currentFilters.event_type = currentFilters.event_type === type ? '' : type;
+    loadLogs(1);
+}
+
+function applyFilters() {
+    currentFilters.project = document.getElementById('projectFilter').value;
+    currentFilters.environment = document.getElementById('environmentFilter').value;
+    loadLogs(1);
+}
+
+function refreshLogs() {
+    loadLogs(currentPage);
+}
+
+function updatePagination(current, total) {
+    totalPages = total;
+    const pagination = document.getElementById('pagination');
+    let html = '';
+    
+    html += `<li class="page-item ${current === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadLogs(${current - 1}); return false;">Previous</a>
+    </li>`;
+    
+    for (let i = 1; i <= total; i++) {
+        if (i === 1 || i === total || (i >= current - 2 && i <= current + 2)) {
+            html += `<li class="page-item ${i === current ? 'active' : ''}">
+                <a class="page-link" href="#" onclick="loadLogs(${i}); return false;">${i}</a>
+            </li>`;
+        } else if (i === current - 3 || i === current + 3) {
+            html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+        }
+    }
+    
+    html += `<li class="page-item ${current === total ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadLogs(${current + 1}); return false;">Next</a>
+    </li>`;
+    
+    pagination.innerHTML = html;
+}
+
+function updateActiveFilters() {
+    const container = document.getElementById('activeFilters');
+    let filters = [];
+    
+    if (currentFilters.member !== 'all') {
+        const memberName = teamMembers[currentFilters.member] || 'Selected Member';
+        filters.push(`<span class="badge bg-info me-2">Member: ${memberName}</span>`);
+    }
+    if (currentFilters.severity) {
+        filters.push(`<span class="badge bg-danger me-2">Severity: ${currentFilters.severity}</span>`);
+    }
+    if (currentFilters.event_type) {
+        filters.push(`<span class="badge bg-success me-2">Type: ${currentFilters.event_type}</span>`);
+    }
+    if (currentFilters.project) {
+        filters.push(`<span class="badge bg-secondary me-2">Project: ${currentFilters.project}</span>`);
+    }
+    
+    container.innerHTML = filters.length ? 
+        '<strong>Active Filters:</strong> ' + filters.join('') : '';
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleString();
+}
+
+function exportLogs() {
+    const params = new URLSearchParams({
+        team: teamId,
+        format: 'json',
+        limit: 1000
+    });
+    
+    if (currentFilters.member !== 'all') {
+        params.append('member', currentFilters.member);
+    }
+    
+    window.location.href = `/team/api/export-logs?${params.toString()}`;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Team Dashboard - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .team-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+        height: 100%;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+    }
+    
+    .team-card .card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+        padding: 15px 20px;
+    }
+    
+    .team-card .card-body {
+        padding: 20px;
+    }
+    
+    .team-stats {
+        display: flex;
+        justify-content: space-around;
+        margin: 15px 0;
+        padding: 10px;
+        background: #f7fafc;
+        border-radius: 8px;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #718096;
+    }
+    
+    .role-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    
+    .role-owner { background: #fbbf24; color: #000; }
+    .role-admin { background: #60a5fa; color: #fff; }
+    .role-member { background: #34d399; color: #fff; }
+    .role-viewer { background: #9ca3af; color: #fff; }
+    
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="team-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Team Collaboration</h1>
+        <p class="lead mb-0">Work together with your team members</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <!-- Create Team Button -->
+    <div class="row mb-4">
+        <div class="col text-end">
+            <a href="{{ url_for('team.create') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Create New Team
+            </a>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Teams You Own -->
+        <div class="col-md-6 mb-4">
+            <div class="team-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crown me-2"></i>
+                        Teams You Own
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if owned_teams %}
+                        {% for team in owned_teams %}
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-1">{{ team.name }}</h5>
+                                    <div class="team-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ team.member_count }}</div>
+                                            <div class="stat-label">Members</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ team.settings.logs or 0 }}</div>
+                                            <div class="stat-label">Logs</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ team.settings.webhooks or 0 }}</div>
+                                            <div class="stat-label">Webhooks</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="role-badge role-owner">Owner</span>
+                            </div>
+                            <div class="mt-3 text-end">
+                                <a href="{{ url_for('team.view', public_id=team.public_id) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Team
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-users"></i>
+                            <h5>No Teams Created Yet</h5>
+                            <p class="text-muted">Create your first team to start collaborating</p>
+                            <a href="{{ url_for('team.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-2"></i>Create Team
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Teams You're In -->
+        <div class="col-md-6 mb-4">
+            <div class="team-card">
+                <div class="card-header" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-friends me-2"></i>
+                        Teams You're In
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if member_teams %}
+                        {% for team in member_teams %}
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="mb-1">{{ team.name }}</h5>
+                                    <p class="text-muted small mb-2">
+                                        <i class="fas fa-user me-1"></i>
+                                        {{ team.owner.username }}
+                                    </p>
+                                    <div class="team-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-value">{{ team.member_count }}</div>
+                                            <div class="stat-label">Members</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="role-badge role-{{ team.role }}">{{ team.role|title }}</span>
+                            </div>
+                            <div class="mt-3 text-end">
+                                <a href="{{ url_for('team.view', public_id=team.public_id) }}" 
+                                   class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Team
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-user-plus"></i>
+                            <h5>Not a Member of Any Team</h5>
+                            <p class="text-muted">Join a team by accepting an invitation</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Overview -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light border-0">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-pie me-2 text-primary"></i>
+                        Team Statistics
+                    </h5>
+                    <div class="row mt-3">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ owned_teams|length + member_teams|length }}</h3>
+                                <small class="text-muted">Total Teams</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ owned_teams|length }}</h3>
+                                <small class="text-muted">Teams You Own</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="text-info">{{ member_teams|length }}</h3>
+                                <small class="text-muted">Teams You Joined</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <h3 class="text-warning">0</h3>
+                                <small class="text-muted">Pending Invites</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

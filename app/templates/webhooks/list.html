@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Webhooks - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .webhook-header {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .webhook-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s;
+        margin-bottom: 20px;
+    }
+    
+    .webhook-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(56, 161, 105, 0.15);
+    }
+    
+    .webhook-card .card-header {
+        background: #f7fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 20px;
+    }
+    
+    .event-tag {
+        background: #e2e8f0;
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+    
+    .event-tag-all {
+        background: #667eea;
+        color: white;
+    }
+    
+    .stats-badge {
+        background: #f7fafc;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #cbd5e0;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="webhook-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Webhooks</h1>
+        <p class="lead mb-0">Integrate with your favorite tools and services</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <!-- Create Button -->
+    <div class="row mb-4">
+        <div class="col text-end">
+            <a href="{{ url_for('webhooks.create') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Create Webhook
+            </a>
+        </div>
+    </div>
+    
+    {% if webhooks %}
+        <!-- Stats Overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Webhooks</h5>
+                        <h2 class="mb-0">{{ webhooks|length }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Delivered</h5>
+                        <h2 class="mb-0">{{ webhooks|sum(attribute='total_delivered') }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Failed</h5>
+                        <h2 class="mb-0">{{ webhooks|sum(attribute='total_failed') }}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <h5 class="card-title">Success Rate</h5>
+                        <h2 class="mb-0">
+                            {% set total = webhooks|sum(attribute='total_delivered') + webhooks|sum(attribute='total_failed') %}
+                            {% if total > 0 %}
+                                {{ ((webhooks|sum(attribute='total_delivered') / total) * 100)|round }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Webhooks List -->
+        {% for webhook in webhooks %}
+        <div class="webhook-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="fas fa-plug me-2 text-success"></i>
+                        {{ webhook.description or 'Webhook' }}
+                    </h5>
+                    <small class="text-muted">{{ webhook.url }}</small>
+                </div>
+                <div>
+                    <span class="badge {% if webhook.is_active %}bg-success{% else %}bg-secondary{% endif %} p-2">
+                        {{ 'Active' if webhook.is_active else 'Inactive' }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <strong>Events:</strong>
+                            <div class="mt-2">
+                                {% for event in webhook.events %}
+                                    <span class="event-tag {% if event == '*' %}event-tag-all{% endif %}">
+                                        {% if event == '*' %}
+                                            <i class="fas fa-infinity me-1"></i> All Events
+                                        {% else %}
+                                            {{ event }}
+                                        {% endif %}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <strong>Secret:</strong>
+                            <code class="bg-light p-1 rounded ms-2">
+                                {{ webhook.secret[:10] }}...{{ webhook.secret[-5:] }}
+                            </code>
+                        </div>
+                        
+                        <div class="stats-badge">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            {{ webhook.total_delivered }} delivered
+                            <i class="fas fa-times-circle text-danger ms-3 me-1"></i>
+                            {{ webhook.total_failed }} failed
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group">
+                            <a href="{{ url_for('webhooks.view', webhook_id=webhook.id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="{{ url_for('webhooks.edit', webhook_id=webhook.id) }}" 
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('webhooks.test', webhook_id=webhook.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('webhooks.delete', webhook_id=webhook.id) }}" 
+                                  class="d-inline" 
+                                  onsubmit="return confirm('Delete this webhook?')">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        {% if webhook.last_triggered_at %}
+                        <div class="mt-2 small text-muted">
+                            Last triggered: {{ webhook.last_triggered_at.strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+    {% else %}
+        <!-- Empty State -->
+        <div class="empty-state">
+            <i class="fas fa-plug"></i>
+            <h3>No Webhooks Yet</h3>
+            <p class="text-muted mb-4">Create your first webhook to integrate with external services</p>
+            <a href="{{ url_for('webhooks.create') }}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus-circle me-2"></i>Create Your First Webhook
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

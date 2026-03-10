@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+
+{% block title %}Agent SDK Platform - Real-time Log Tracking & Analytics{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 100px 0;
+        color: white;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+    }
+    
+    /* Features Section */
+    .features-section {
+        padding: 80px 0;
+        background: #f8f9fa;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .feature-icon i {
+        font-size: 30px;
+        color: white;
+    }
+    
+    .feature-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        padding: 60px 0;
+        background: white;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 80px 0;
+        color: white;
+        text-align: center;
+    }
+    
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    
+    .cta-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+    }
+    
+    .cta-buttons .btn {
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        margin: 0 10px;
+    }
+    
+    /* Testimonials */
+    .testimonial-section {
+        padding: 80px 0;
+        background: #f8f9fa;
+    }
+    
+    .testimonial-card {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .testimonial-text {
+        font-style: italic;
+        color: #495057;
+        margin-bottom: 20px;
+    }
+    
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+    }
+    
+    .testimonial-author img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 15px;
+    }
+    
+    .author-name {
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    .author-title {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    /* Pricing */
+    .pricing-section {
+        padding: 80px 0;
+        background: white;
+    }
+    
+    .pricing-card {
+        background: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        height: 100%;
+        transition: transform 0.3s;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .pricing-card.popular {
+        border: 2px solid #667eea;
+        transform: scale(1.05);
+    }
+    
+    .pricing-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .pricing-price {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 20px;
+    }
+    
+    .pricing-price span {
+        font-size: 1rem;
+        color: #6c757d;
+    }
+    
+    .pricing-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 30px;
+    }
+    
+    .pricing-features li {
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .pricing-features li:last-child {
+        border-bottom: none;
+    }
+    
+    .pricing-features i {
+        color: #28a745;
+        margin-right: 10px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-section {
+            padding: 60px 0;
+        }
+        
+        .feature-card {
+            margin-bottom: 20px;
+        }
+        
+        .pricing-card.popular {
+            transform: scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container text-center">
+        <h1 class="hero-title">Monitor Your Applications in Real-Time</h1>
+        <p class="hero-subtitle">Agent SDK provides powerful log tracking and analytics to help you debug, monitor, and optimize your applications.</p>
+        <div class="cta-buttons">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg me-2">
+                    <i class="bi bi-person-plus me-2"></i>Get Started Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose Agent SDK?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h3 class="feature-title">Real-time Tracking</h3>
+                    <p class="text-muted">Monitor logs as they happen with sub-second latency. Get instant visibility into errors and performance issues.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h3 class="feature-title">Advanced Analytics</h3>
+                    <p class="text-muted">Deep insights into user behavior and system performance with interactive dashboards and customizable reports.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-code-square"></i>
+                    </div>
+                    <h3 class="feature-title">Multi-language SDK</h3>
+                    <p class="text-muted">Easy integration with JavaScript, Python, React, Vue, Angular, and more. Simple API for all platforms.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">10M+</div>
+                    <div class="stat-label">Events Processed</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">Uptime SLA</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">5K+</div>
+                    <div class="stat-label">Happy Customers</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-item">
+                    <div class="stat-number">50ms</div>
+                    <div class="stat-label">Avg Latency</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <span class="h3 mb-0 text-white">1</span>
+                    </div>
+                    <h3 class="feature-title">Sign Up</h3>
+                    <p class="text-muted">Create your free account in seconds</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <span class="h3 mb-0 text-white">2</span>
+                    </div>
+                    <h3 class="feature-title">Get API Key</h3>
+                    <p class="text-muted">Generate from your dashboard</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <span class="h3 mb-0 text-white">3</span>
+                    </div>
+                    <h3 class="feature-title">Install SDK</h3>
+                    <p class="text-muted">npm install / pip install</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="feature-card text-center">
+                    <div class="feature-icon mx-auto">
+                        <span class="h3 mb-0 text-white">4</span>
+                    </div>
+                    <h3 class="feature-title">Start Tracking</h3>
+                    <p class="text-muted">View analytics in real-time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonial-section">
+    <div class="container">
+        <h2 class="text-center mb-5">What Our Customers Say</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Agent SDK transformed how we monitor our applications. The real-time insights are invaluable."</p>
+                    <div class="testimonial-author">
+                        <img src="https://via.placeholder.com/50" alt="Author">
+                        <div>
+                            <h5 class="author-name">John Doe</h5>
+                            <p class="author-title">CTO, TechCorp</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Implementation was a breeze. The documentation is excellent and support is super responsive."</p>
+                    <div class="testimonial-author">
+                        <img src="https://via.placeholder.com/50" alt="Author">
+                        <div>
+                            <h5 class="author-name">Jane Smith</h5>
+                            <p class="author-title">Lead Developer, StartupX</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"The analytics dashboard gives us insights we never had before. Game changer for our team."</p>
+                    <div class="testimonial-author">
+                        <img src="https://via.placeholder.com/50" alt="Author">
+                        <div>
+                            <h5 class="author-name">Mike Johnson</h5>
+                            <p class="author-title">Product Manager, InnovateLabs</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="pricing-section">
+    <div class="container">
+        <h2 class="text-center mb-5">Simple, Transparent Pricing</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="pricing-card">
+                    <h3 class="pricing-title">Free</h3>
+                    <div class="pricing-price">$0<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle"></i> 10,000 events/month</li>
+                        <li><i class="bi bi-check-circle"></i> 7-day retention</li>
+                        <li><i class="bi bi-check-circle"></i> Basic analytics</li>
+                        <li><i class="bi bi-check-circle"></i> Email support</li>
+                    </ul>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary w-100">Get Started</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="pricing-card popular">
+                    <span class="badge bg-primary position-absolute top-0 start-50 translate-middle">Popular</span>
+                    <h3 class="pricing-title">Pro</h3>
+                    <div class="pricing-price">$49<span>/month</span></div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle"></i> 100,000 events/month</li>
+                        <li><i class="bi bi-check-circle"></i> 30-day retention</li>
+                        <li><i class="bi bi-check-circle"></i> Advanced analytics</li>
+                        <li><i class="bi bi-check-circle"></i> Priority support</li>
+                    </ul>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary w-100">Start Free Trial</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="pricing-card">
+                    <h3 class="pricing-title">Enterprise</h3>
+                    <div class="pricing-price">Custom</div>
+                    <ul class="pricing-features">
+                        <li><i class="bi bi-check-circle"></i> Unlimited events</li>
+                        <li><i class="bi bi-check-circle"></i> 1-year retention</li>
+                        <li><i class="bi bi-check-circle"></i> Custom analytics</li>
+                        <li><i class="bi bi-check-circle"></i> 24/7 phone support</li>
+                    </ul>
+                    <a href="#" class="btn btn-outline-primary w-100">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Ready to Get Started?</h2>
+        <p class="cta-subtitle">Join thousands of developers using Agent SDK to build better applications</p>
+        <div class="cta-buttons">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-speedometer2 me-2"></i>Go to Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                    <i class="bi bi-person-plus me-2"></i>Sign Up Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

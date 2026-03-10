@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}API Key Created - Agent SDK Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow {% if regenerated %}border-warning{% else %}border-success{% endif %}">
+                <div class="card-header {% if regenerated %}bg-warning{% else %}bg-success{% endif %} text-white">
+                    <h4 class="mb-0">
+                        {% if regenerated %}
+                            <i class="fas fa-sync-alt me-2"></i>API Key Regenerated
+                        {% else %}
+                            <i class="fas fa-check-circle me-2"></i>API Key Created Successfully
+                        {% endif %}
+                    </h4>
+                </div>
+                
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> Copy your API key secret now. For security reasons, 
+                        it won't be shown again!
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Key Name</label>
+                        <input type="text" class="form-control" value="{{ key_name }}" readonly>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Key ID</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="keyId" value="{{ key_id }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('keyId')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Key Secret</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace" id="keySecret" value="{{ key_secret }}" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyToClipboard('keySecret')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            This is the only time the secret will be displayed. Save it securely!
+                        </small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Full Key (for SDK configuration)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control font-monospace bg-light" 
+                                   id="fullKey" value="{{ key_id }}:{{ key_secret }}" readonly>
+                            <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('fullKey')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            Use this format in your SDK configuration: key_id:key_secret
+                        </small>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h5 class="mb-3">Quick Start Example</h5>
+                    
+                    <div class="bg-dark text-light p-3 rounded mb-4">
+                        <pre class="mb-0"><code>// Initialize Agent SDK with your new key
+const agent = new AgentSDK({
+    apiKey: '{{ key_id }}:{{ key_secret }}',
+    project: 'your-project-name',
+    environment: 'production'
+});
+
+// Track an event
+agent.track('page_view', {
+    page: '/home',
+    user_id: 'user123'
+});</code></pre>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('api_keys.manage_keys') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to API Keys
+                        </a>
+                        <a href="{{ url_for('documentation.index') }}" class="btn btn-primary">
+                            <i class="fas fa-book me-2"></i>View Documentation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function copyToClipboard(elementId) {
+    var copyText = document.getElementById(elementId);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    
+    // Show tooltip
+    var button = event.target.closest('button');
+    var originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check me-2"></i>Copied!';
+    setTimeout(function() {
+        button.innerHTML = originalText;
+    }, 2000);
+}
+</script>
+{% endblock %}
+{% endblock %}

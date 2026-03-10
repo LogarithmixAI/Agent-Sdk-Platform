@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Phone - Agent SDK Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Verify Your Phone Number</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        OTP sent to: <strong>{{ phone }}</strong>
+                    </div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Enter 6-digit OTP</label>
+                            <input type="text" class="form-control" name="otp" 
+                                   maxlength="6" pattern="[0-9]{6}" 
+                                   placeholder="123456" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-check-circle me-2"></i>Verify OTP
+                        </button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <form method="POST" action="{{ url_for('auth.send_phone_otp_route') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-link">
+                                <i class="fas fa-redo-alt me-1"></i>Resend OTP
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
