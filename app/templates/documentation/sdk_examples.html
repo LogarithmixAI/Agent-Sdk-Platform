@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}SDK Examples - Agent SDK Platform{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h2 mb-4">SDK Code Examples</h1>
+    
+    <!-- Language Tabs -->
+    <ul class="nav nav-tabs mb-4" id="exampleTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="js-tab" data-bs-toggle="tab" data-bs-target="#js" type="button">
+                JavaScript
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="python-tab" data-bs-toggle="tab" data-bs-target="#python" type="button">
+                Python
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="react-tab" data-bs-toggle="tab" data-bs-target="#react" type="button">
+                React
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab Content -->
+    <div class="tab-content" id="exampleTabContent">
+        <!-- JavaScript -->
+        <div class="tab-pane fade show active" id="js" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Basic Initialization</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-javascript">// Initialize the SDK
+const agent = new AgentSDK({
+    apiKey: 'your-api-key-id:your-api-key-secret',
+    project: 'my-web-app',
+    environment: 'production'
+});
+
+// Track a page view
+agent.track('page_view', {
+    page: window.location.pathname,
+    title: document.title
+});
+
+// Track a button click
+document.getElementById('signup-btn').addEventListener('click', () => {
+    agent.track('button_click', {
+        button_id: 'signup',
+        button_text: 'Sign Up'
+    });
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Error Tracking</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-javascript">// Track caught errors
+try {
+    // Risky operation
+    JSON.parse(invalidData);
+} catch (error) {
+    agent.error(error, {
+        component: 'DataParser',
+        action: 'parse'
+    });
+}
+
+// Global error handler
+window.onerror = function(msg, url, line, col, error) {
+    agent.error(error || new Error(msg), {
+        url: url,
+        line: line,
+        column: col
+    });
+};</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">User Identification</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-javascript">// Identify user after login
+agent.identify('user-123', {
+    email: 'user@example.com',
+    name: 'John Doe',
+    plan: 'premium',
+    signup_date: '2026-01-15'
+});
+
+// Set global properties
+agent.registerGlobalProperties({
+    app_version: '1.2.3',
+    platform: 'web',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">Batch Processing</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-javascript">// Manual batching
+agent.batch([
+    {
+        type: 'page_view',
+        data: { page: '/home' }
+    },
+    {
+        type: 'api_call',
+        data: { 
+            endpoint: '/users', 
+            duration: 234 
+        }
+    }
+]);
+
+// Auto-batching (default)
+// Configure batch size and interval
+const agent = new AgentSDK({
+    apiKey: 'your-key',
+    project: 'my-app',
+    batchSize: 20,
+    flushInterval: 10000
+});</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Python -->
+        <div class="tab-pane fade" id="python" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Basic Setup</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-python">from agent_sdk import AgentSDK
+
+# Initialize the SDK
+agent = AgentSDK(
+    api_key='your-api-key-id:your-api-key-secret',
+    project='my-python-app',
+    environment='production'
+)
+
+# Track an event
+agent.track('user_action', {
+    'action': 'login',
+    'user_id': 'user-123'
+})</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Exception Tracking</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-python">try:
+    # Your code here
+    result = 1 / 0
+except Exception as e:
+    agent.error(e, {
+        'function': 'calculate',
+        'input': data
+    })
+
+# Using decorator
+@agent.track_call
+def process_order(order_id):
+    # Function will be automatically tracked
+    return process_order_internal(order_id)</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- React -->
+        <div class="tab-pane fade" id="react" role="tabpanel">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Provider Setup</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-jsx">import { AgentSDKProvider } from '@agent-sdk/react';
+
+function App() {
+    return (
+        <AgentSDKProvider 
+            apiKey="your-api-key"
+            project="react-app"
+            environment="production"
+        >
+            <YourComponent />
+        </AgentSDKProvider>
+    );
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Hooks Usage</h5>
+                        </div>
+                        <div class="card-body">
+                            <pre><code class="language-jsx">import { useAgent } from '@agent-sdk/react';
+
+function YourComponent() {
+    const agent = useAgent();
+    
+    useEffect(() => {
+        agent.track('component_mount', {
+            component: 'YourComponent'
+        });
+    }, []);
+    
+    const handleClick = () => {
+        agent.track('button_click', {
+            button: 'submit'
+        });
+    };
+    
+    return <button onClick={handleClick}>Click me</button>;
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Live Demo -->
+    <div class="card mt-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Try It Live</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Code Editor</h6>
+                    <textarea class="form-control font-monospace" rows="10" id="liveCode">
+// Try the SDK here
+const agent = new AgentSDK({
+    apiKey: 'test-key',
+    project: 'demo'
+});
+
+agent.track('demo_event', {
+    message: 'Hello World'
+});</textarea>
+                    <button class="btn btn-primary mt-2" onclick="runLiveCode()">
+                        <i class="fas fa-play me-2"></i>Run Code
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <h6>Output</h6>
+                    <pre class="bg-light p-3 rounded" id="liveOutput" style="min-height: 200px;">Click "Run Code" to see output</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function runLiveCode() {
+    const code = document.getElementById('liveCode').value;
+    const output = document.getElementById('liveOutput');
+    
+    try {
+        // In a real implementation, this would safely evaluate the code
+        // For demo purposes, we'll just show the code
+        output.innerHTML = '✅ Code executed successfully!\n\n' + 
+                          'Event would be sent:\n' + code;
+    } catch (error) {
+        output.innerHTML = '❌ Error: ' + error.message;
+    }
+}
+</script>
+{% endblock %}

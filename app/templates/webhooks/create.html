@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Create Webhook - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .create-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #4a5568;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 12px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #38a169;
+        box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);
+        outline: none;
+    }
+    
+    .event-group {
+        background: #f7fafc;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .event-item {
+        padding: 8px;
+        transition: background 0.2s;
+    }
+    
+    .event-item:hover {
+        background: #edf2f7;
+        border-radius: 5px;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(56, 161, 105, 0.3);
+    }
+    
+    .secret-box {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="create-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Create Webhook</h1>
+        <p class="lead mb-0">Connect your applications and services</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="create-card">
+        <form method="POST" action="{{ url_for('webhooks.create') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- URL -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-link me-2 text-success"></i>
+                    Payload URL
+                </label>
+                <input type="url" class="form-control" name="url" 
+                       placeholder="https://api.example.com/webhook" required>
+                <small class="text-muted">Where we'll send HTTP POST requests</small>
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-align-left me-2 text-success"></i>
+                    Description
+                </label>
+                <input type="text" class="form-control" name="description" 
+                       placeholder="e.g., Slack integration for errors">
+                <small class="text-muted">Optional: Identify this webhook easily</small>
+            </div>
+            
+            <!-- Events -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-bolt me-2 text-success"></i>
+                    Events to Trigger
+                </label>
+                <div class="event-group">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="selectAll">
+                        <label class="form-check-label fw-bold" for="selectAll">
+                            All Events (*)
+                        </label>
+                        <small class="text-muted d-block ms-4">Receive all event types</small>
+                    </div>
+                    
+                    <hr>
+                    
+                    {% for event in event_types %}
+                    <div class="event-item">
+                        <div class="form-check">
+                            <input class="form-check-input event-checkbox" 
+                                   type="checkbox" name="events" 
+                                   value="{{ event.id }}" id="event_{{ loop.index }}">
+                            <label class="form-check-label" for="event_{{ loop.index }}">
+                                <strong>{{ event.name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ event.description }}</small>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Advanced Settings (Collapsible) -->
+            <div class="mb-3">
+                <button class="btn btn-sm btn-outline-secondary" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#advancedSettings">
+                    <i class="fas fa-cog me-1"></i> Advanced Settings
+                </button>
+                
+                <div class="collapse mt-3" id="advancedSettings">
+                    <div class="card card-body bg-light">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Retry Count</label>
+                                <input type="number" class="form-control" name="retry_count" 
+                                       value="3" min="0" max="5">
+                                <small class="text-muted">Number of retry attempts</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Timeout (seconds)</label>
+                                <input type="number" class="form-control" name="timeout" 
+                                       value="5" min="1" max="30">
+                                <small class="text-muted">Request timeout</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Secret Preview -->
+            <div class="alert alert-info">
+                <i class="fas fa-shield-alt me-2"></i>
+                <strong>Security:</strong> A secret will be automatically generated for signing requests.
+            </div>
+            
+            <!-- Submit -->
+            <button type="submit" class="btn-create mt-3">
+                <i class="fas fa-plug me-2"></i>Create Webhook
+            </button>
+        </form>
+        
+        <!-- Back Link -->
+        <div class="text-center mt-3">
+            <a href="{{ url_for('webhooks.list_webhooks') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Back to Webhooks
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('selectAll')?.addEventListener('change', function(e) {
+    const checkboxes = document.querySelectorAll('.event-checkbox');
+    checkboxes.forEach(cb => cb.checked = e.target.checked);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,677 @@
+
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --docs-sidebar-width: 280px;
+    }
+    
+    .markdown-content h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .markdown-content h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .markdown-content h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+    }
+
+    .markdown-content ul, .markdown-content ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+
+    .markdown-content li {
+        margin-bottom: 0.5rem;
+    }
+
+    .markdown-content code {
+        background: #f1f3f5;
+        color: #d63384;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .markdown-content pre {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+    }
+
+    .markdown-content pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+    }
+
+    .markdown-content a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .markdown-content a:hover {
+        text-decoration: underline;
+    }
+
+    .markdown-content blockquote {
+        background: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .markdown-content table {
+        width: 100%;
+        margin: 1.5rem 0;
+        border-collapse: collapse;
+    }
+
+    .markdown-content th {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .markdown-content td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .docs-wrapper {
+        display: flex;
+        min-height: calc(100vh - 60px);
+    }
+    
+    /* Sidebar */
+    .docs-sidebar {
+        width: var(--docs-sidebar-width);
+        background: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        bottom: 0;
+        overflow-y: auto;
+        padding: 2rem 1rem;
+        transition: all 0.3s;
+    }
+    
+    .docs-sidebar.collapsed {
+        transform: translateX(-100%);
+    }
+    
+    .docs-sidebar .nav-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .docs-sidebar .nav-section-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.75rem;
+        padding-left: 1rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .docs-sidebar .nav-section-title i {
+        margin-right: 0.5rem;
+        width: 20px;
+        color: #6c757d;
+    }
+    
+    .docs-sidebar .nav-link {
+        color: #6c757d;
+        padding: 0.5rem 1rem 0.5rem 2.5rem;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        transition: all 0.2s;
+    }
+    
+    .docs-sidebar .nav-link:hover {
+        background: #e9ecef;
+        color: #0d6efd;
+    }
+    
+    .docs-sidebar .nav-link.active {
+        background: #e7f1ff;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    /* Main Content */
+    .docs-content {
+        flex: 1;
+        margin-left: var(--docs-sidebar-width);
+        padding: 2rem;
+        transition: margin-left 0.3s;
+        max-width: calc(100% - var(--docs-sidebar-width));
+    }
+    
+    .docs-content.expanded {
+        margin-left: 0;
+        max-width: 100%;
+    }
+    
+    /* Typography */
+    .docs-content h1 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .docs-content h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .docs-content h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .docs-content p {
+        line-height: 1.7;
+        color: #495057;
+        margin-bottom: 1.25rem;
+    }
+    
+    .docs-content code {
+        background: #f1f3f5;
+        color: #d63384;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .docs-content pre {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 1rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 1.5rem 0;
+    }
+    
+    .docs-content pre code {
+        background: none;
+        color: inherit;
+        padding: 0;
+    }
+    
+    .docs-content blockquote {
+        background: #f8f9fa;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .docs-content table {
+        width: 100%;
+        margin: 1.5rem 0;
+        border-collapse: collapse;
+    }
+    
+    .docs-content th {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        font-weight: 600;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .docs-content td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .docs-content tr:hover {
+        background: #f8f9fa;
+    }
+    
+    /* Alert boxes */
+    .docs-alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+    
+    .docs-alert.info {
+        background: #cff4fc;
+        border-left: 4px solid #0dcaf0;
+        color: #055160;
+    }
+    
+    .docs-alert.warning {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        color: #664d03;
+    }
+    
+    .docs-alert.danger {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+        color: #842029;
+    }
+    
+    .docs-alert.success {
+        background: #d1e7dd;
+        border-left: 4px solid #198754;
+        color: #0f5132;
+    }
+    
+    /* Search */
+    .docs-search {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+    
+    .docs-search input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .docs-search i {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #adb5bd;
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: none;
+        z-index: 1000;
+    }
+    
+    .search-results.show {
+        display: block;
+    }
+    
+    .search-result-item {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #f1f3f5;
+        cursor: pointer;
+    }
+    
+    .search-result-item:hover {
+        background: #f8f9fa;
+    }
+    
+    .search-result-item .title {
+        font-weight: 500;
+        color: #212529;
+    }
+    
+    .search-result-item .section {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    /* Toggle sidebar button */
+    .docs-toggle-btn {
+        position: fixed;
+        bottom: 2rem;
+        left: 1rem;
+        z-index: 1000;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .docs-toggle-btn:hover {
+        transform: scale(1.1);
+        background: #0b5ed7;
+    }
+    
+    /* Language selector */
+    .language-selector {
+        position: sticky;
+        top: 2rem;
+        float: right;
+        margin-left: 1rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 0.25rem;
+        display: inline-flex;
+    }
+    
+    .language-option {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    
+    .language-option.active {
+        background: #0d6efd;
+        color: white;
+    }
+    
+    /* Copy button */
+    .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: white;
+        border-radius: 4px;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .copy-btn:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    pre {
+        position: relative;
+    }
+
+    
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .docs-sidebar {
+            transform: translateX(-100%);
+            z-index: 1030;
+        }
+        
+        .docs-sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .docs-content {
+            margin-left: 0;
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="docs-wrapper">
+    <!-- Sidebar Toggle Button (Mobile) -->
+    <button class="docs-toggle-btn d-md-none" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Sidebar -->
+    <div class="docs-sidebar" id="docsSidebar">
+        <!-- Search -->
+        <div class="docs-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search documentation..." autocomplete="off">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="nav flex-column">
+            {% for section_id, section in structure.items() %}
+                <div class="nav-section">
+                    <div class="nav-section-title">
+                        <i class="fas fa-{{ section.icon }}"></i>
+                        {{ section.title }}
+                    </div>
+                    {% for page in section.pages %}
+                        <a class="nav-link {% if current_page and current_page.id == page.id %}active{% endif %}" 
+                           href="{{ url_for('documentation.index', page=page.id) }}">
+                            {{ page.title }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </nav>
+        
+        <!-- Additional Links -->
+        <hr>
+        <div class="mt-3">
+            <a href="#" class="nav-link text-muted">
+                <i class="fas fa-download me-2"></i>Download SDK
+            </a>
+            <a href="#" class="nav-link text-muted">
+                <i class="fas fa-github me-2"></i>GitHub Repository
+            </a>
+            <a href="#" class="nav-link text-muted">
+                <i class="fas fa-comment me-2"></i>Community Forum
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="docs-content" id="docsContent">
+        <!-- Language Selector (for code examples) -->
+        <div class="language-selector">
+            <span class="language-option active" data-lang="javascript">JS</span>
+            <span class="language-option" data-lang="python">Python</span>
+            <span class="language-option" data-lang="react">React</span>
+            <span class="language-option" data-lang="curl">cURL</span>
+        </div>
+        
+        <!-- Markdown Content -->
+        <div class="markdown-content">
+            {{ content|markdown|safe }}
+        </div>
+        
+        <!-- Feedback -->
+        <div class="card mt-5">
+            <div class="card-body">
+                <h5 class="card-title">Was this helpful?</h5>
+                <p class="card-text text-muted">Help us improve our documentation.</p>
+                <div>
+                    <button class="btn btn-sm btn-outline-success me-2" onclick="sendFeedback(true)">
+                        <i class="fas fa-thumbs-up me-1"></i>Yes
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="sendFeedback(false)">
+                        <i class="fas fa-thumbs-down me-1"></i>No
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit on GitHub -->
+        <div class="text-center mt-4">
+            <a href="#" class="text-muted">
+                <i class="fab fa-github me-1"></i>Edit this page on GitHub
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let searchTimeout;
+
+// Sidebar Toggle
+document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+    document.getElementById('docsSidebar').classList.toggle('show');
+});
+
+// Search functionality
+document.getElementById('searchInput')?.addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    const query = e.target.value;
+    
+    if (query.length < 3) {
+        document.getElementById('searchResults').classList.remove('show');
+        return;
+    }
+    
+    searchTimeout = setTimeout(() => {
+        fetch(`/docs/api/search?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(data => {
+                const resultsDiv = document.getElementById('searchResults');
+                resultsDiv.innerHTML = '';
+                
+                if (data.results.length > 0) {
+                    data.results.forEach(result => {
+                        const div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.innerHTML = `
+                            <div class="title">${result.title}</div>
+                            <div class="section">${result.section}</div>
+                        `;
+                        div.onclick = () => {
+                            window.location.href = result.url;
+                        };
+                        resultsDiv.appendChild(div);
+                    });
+                    resultsDiv.classList.add('show');
+                } else {
+                    resultsDiv.innerHTML = '<div class="p-3 text-muted">No results found</div>';
+                    resultsDiv.classList.add('show');
+                }
+            });
+    }, 300);
+});
+
+// Close search when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.docs-search')) {
+        document.getElementById('searchResults').classList.remove('show');
+    }
+});
+
+// Language selector for code examples
+document.querySelectorAll('.language-option').forEach(option => {
+    option.addEventListener('click', async function() {
+        // Update active state
+        document.querySelectorAll('.language-option').forEach(opt => 
+            opt.classList.remove('active'));
+        this.classList.add('active');
+        
+        const lang = this.dataset.lang;
+        
+        // Fetch examples for selected language
+        try {
+            const response = await fetch(`/docs/api/examples/${lang}`);
+            const examples = await response.json();
+            
+            // Update code examples in the page
+            updateCodeExamples(lang, examples);
+        } catch (error) {
+            console.error('Error loading examples:', error);
+        }
+    });
+});
+
+function updateCodeExamples(lang, examples) {
+    // Find all code blocks with data-example attribute
+    document.querySelectorAll('[data-example]').forEach(el => {
+        const exampleKey = el.dataset.example;
+        if (examples[exampleKey]) {
+            el.textContent = examples[exampleKey];
+        }
+    });
+}
+
+// Copy code to clipboard
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
+        const btn = e.target.closest('.copy-btn');
+        const code = btn.closest('pre').querySelector('code').textContent;
+        
+        navigator.clipboard.writeText(code).then(() => {
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            }, 2000);
+        });
+    }
+});
+
+// Add copy buttons to code blocks
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        pre.appendChild(btn);
+    });
+});
+
+// Feedback
+function sendFeedback(helpful) {
+    fetch('/docs/api/feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            page: window.location.pathname,
+            helpful: helpful
+        })
+    }).then(() => {
+        alert('Thank you for your feedback!');
+    });
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
+    }
+    
+    // Escape to close search
+    if (e.key === 'Escape') {
+        document.getElementById('searchResults').classList.remove('show');
+    }
+});
+</script>
+{% endblock %}

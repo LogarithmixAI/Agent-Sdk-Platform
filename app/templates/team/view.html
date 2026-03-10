@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block title %}{{ team.name }} - Team Details{% endblock %}
+
+{% block extra_css %}
+<style>
+    .team-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 60px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .team-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .team-card .card-header {
+        background: #f7fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 20px;
+        font-weight: 600;
+    }
+    
+    .member-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+        transition: background 0.2s;
+    }
+    
+    .member-item:hover {
+        background: #f7fafc;
+    }
+    
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        margin-right: 15px;
+    }
+    
+    .member-info {
+        flex: 1;
+    }
+    
+    .member-name {
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+    
+    .member-email {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+    
+    .role-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .role-owner { background: #fbbf24; color: #000; }
+    .role-admin { background: #60a5fa; color: #fff; }
+    .role-member { background: #34d399; color: #fff; }
+    .role-viewer { background: #9ca3af; color: #fff; }
+    
+    .permission-tag {
+        background: #e2e8f0;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        margin-right: 5px;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .stat-box {
+        background: #f7fafc;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #718096;
+    }
+    
+    .action-menu {
+        position: relative;
+    }
+    
+    .action-btn {
+        background: none;
+        border: none;
+        color: #718096;
+        cursor: pointer;
+    }
+    
+    .invite-box {
+        background: #f7fafc;
+        border: 2px dashed #cbd5e0;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Team Header -->
+<section class="team-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">{{ team.name }}</h1>
+                <p class="lead mb-0">{{ team.settings.description or 'No description' }}</p>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark p-3">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Created {{ team.created_at.strftime('%Y-%m-%d') }}
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="row">
+        <!-- Left Column - Team Info & Members -->
+        <div class="col-md-8">
+            <!-- Team Stats -->
+            <div class="team-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i>
+                    Team Statistics
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ logs_summary.total_logs }}</div>
+                            <div class="stat-label">Total Logs</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">{{ logs_summary.last_24h }}</div>
+                            <div class="stat-label">Last 24h</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">{{ members|length }}</div>
+                            <div class="stat-label">Members</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">{{ logs_summary.active_sources }}</div>
+                            <div class="stat-label">Active Sources</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Members List -->
+            <div class="team-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="fas fa-users me-2 text-primary"></i>
+                        Team Members ({{ members|length }})
+                    </span>
+                    {% if is_owner or user_role == 'admin' %}
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#inviteModal">
+                        <i class="fas fa-user-plus me-1"></i>Add Member
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% for member, user in members %}
+                    <div class="member-item">
+                        <div class="member-avatar">
+                            {{ user.username[:2].upper() }}
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">
+                                {{ user.full_name or user.username }}
+                                {% if user.id == team.owner_id %}
+                                    <span class="badge bg-warning ms-2">Owner</span>
+                                {% endif %}
+                            </div>
+                            <div class="member-email">{{ user.email }}</div>
+                            <div class="mt-2">
+                                {% for perm in member.permissions %}
+                                    <span class="permission-tag">{{ perm }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="role-badge role-{{ member.role }} me-2">
+                                {{ member.role|title }}
+                            </span>
+                            
+                            {% if is_owner and user.id != team.owner_id %}
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                        type="button" data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <form method="POST" action="{{ url_for('team.update_role', public_id=team.public_id, user_id=user.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="role" value="admin">
+                                            <button type="submit" class="dropdown-item">Make Admin</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('team.update_role', public_id=team.public_id, user_id=user.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="role" value="member">
+                                            <button type="submit" class="dropdown-item">Make Member</button>
+                                        </form>
+                                    </li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('team.update_role', public_id=team.public_id, user_id=user.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <input type="hidden" name="role" value="viewer">
+                                            <button type="submit" class="dropdown-item">Make Viewer</button>
+                                        </form>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form method="POST" action="{{ url_for('team.remove_member', public_id=team.public_id, user_id=user.id) }}">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="dropdown-item text-danger">Remove</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if user.id == current_user.id and not is_owner %}
+                            <form method="POST" action="{{ url_for('team.leave_team', public_id=team.public_id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                        onclick="return confirm('Are you sure you want to leave this team?')">
+                                    <i class="fas fa-sign-out-alt"></i> Leave
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    {% if pending_invites %}
+                    <div class="card-header bg-warning bg-opacity-10 mt-3">
+                        <i class="fas fa-clock me-2 text-warning"></i>
+                        Pending Invites
+                    </div>
+                    <div class="card-body p-0">
+                        {% for invite in pending_invites %}
+                        <div class="member-item">
+                            <div class="member-avatar" style="background: #fbbf24;">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">{{ invite.email }}</div>
+                                <div class="member-email">Invited as {{ invite.role }}</div>
+                            </div>
+                            <div>
+                                <span class="badge bg-warning">Pending</span>
+                                {% if is_owner %}
+                                <form method="POST" action="#" class="d-inline">
+                                    <button class="btn btn-sm btn-danger">Cancel</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Settings & Actions -->
+        <div class="col-md-4">
+            <!-- Team Settings -->
+            <div class="team-card">
+                <div class="card-header">
+                    <i class="fas fa-cog me-2 text-primary"></i>
+                    Team Settings
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="fw-bold">Team ID</label>
+                        <code class="d-block bg-light p-2 rounded mt-1">{{ team.id }}</code>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Owner</label>
+                        <p class="mb-0">{{ team.owner.username }}</p>
+                        <small class="text-muted">{{ team.owner.email }}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Created</label>
+                        <p class="mb-0">{{ team.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="team-card">
+                <div class="card-header">
+                    <i class="fas fa-bolt me-2 text-primary"></i>
+                    Quick Actions
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('webhooks.list_webhooks') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-plug me-2"></i>Manage Webhooks
+                        </a>
+                        <a href="{{ url_for('team.team_logs', public_id=team.public_id) }}" class="btn btn-outline-info">
+                            <i class="fas fa-list me-2"></i>View Team Logs
+                        </a>
+                        
+                        {% if is_owner %}
+                        <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#transferModal">
+                            <i class="fas fa-exchange-alt me-2"></i>Transfer Ownership
+                        </button>
+                        
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i>Delete Team
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="team-card">
+                <div class="card-header">
+                    <i class="fas fa-history me-2 text-primary"></i>
+                    Recent Activity
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center py-3">No recent activity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invite Member Modal -->
+<div class="modal fade" id="inviteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>Add Team Member
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('team.add_member', public_id=team.public_id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" 
+                               placeholder="colleague@example.com" required>
+                        <small class="text-muted">User must have an account</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role">
+                            <option value="admin">Admin - Can manage members and webhooks</option>
+                            <option value="member" selected>Member - Can view logs and create webhooks</option>
+                            <option value="viewer">Viewer - Can only view logs</option>
+                        </select>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        The user will get access immediately after adding.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Add Member
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Team Modal -->
+{% if is_owner %}
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Delete Team
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="fw-bold text-danger">This action cannot be undone!</p>
+                <p>Deleting this team will:</p>
+                <ul>
+                    <li>Remove all team members</li>
+                    <li>Delete all team webhooks</li>
+                    <li>Remove team access to shared logs</li>
+                </ul>
+                
+                <div class="mb-3">
+                    <label class="form-label">Type <strong>{{ team.name }}</strong> to confirm</label>
+                    <input type="text" class="form-control" id="confirmDelete" 
+                           placeholder="Enter team name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('team.delete_team', public_id=team.public_id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger" id="deleteBtn" disabled>
+                        <i class="fas fa-trash me-2"></i>Delete Team
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('confirmDelete')?.addEventListener('input', function(e) {
+    const deleteBtn = document.getElementById('deleteBtn');
+    deleteBtn.disabled = e.target.value !== '{{ team.name }}';
+});
+</script>
+{% endif %}
+{% endblock %}

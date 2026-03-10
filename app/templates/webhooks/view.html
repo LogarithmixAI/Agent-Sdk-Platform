@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Webhook Details - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .webhook-header {
+        background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .detail-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+    
+    .detail-card .card-header {
+        background: #f7fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 15px 20px;
+        font-weight: 600;
+    }
+    
+    .secret-box {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        word-break: break-all;
+    }
+    
+    .delivery-item {
+        padding: 15px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .delivery-item:hover {
+        background: #f7fafc;
+    }
+    
+    .delivery-success {
+        border-left: 3px solid #48bb78;
+    }
+    
+    .delivery-failed {
+        border-left: 3px solid #f56565;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+    }
+    
+    .stat-box {
+        background: #f7fafc;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #38a169;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="webhook-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">{{ webhook.description or 'Webhook' }}</h1>
+                <p class="lead mb-0">{{ webhook.url }}</p>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark p-3">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Created {{ webhook.created_at.strftime('%Y-%m-%d') }}
+                </span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{{ url_for('webhooks.list_webhooks') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+        </div>
+        <div class="col text-end">
+            <div class="btn-group">
+                <a href="{{ url_for('webhooks.edit', webhook_id=webhook.id) }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+                <form method="POST" action="{{ url_for('webhooks.test', webhook_id=webhook.id) }}" 
+                      class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-2"></i>Test
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('webhooks.regenerate_secret', webhook_id=webhook.id) }}" 
+                      class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-sync-alt me-2"></i>Regenerate Secret
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('webhooks.delete', webhook_id=webhook.id) }}" 
+                      class="d-inline" 
+                      onsubmit="return confirm('Are you sure you want to delete this webhook?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column - Details -->
+        <div class="col-md-5">
+            <!-- Webhook Details -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2 text-success"></i>
+                    Webhook Details
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="fw-bold">Status</label>
+                        <div>
+                            <span class="badge {% if webhook.is_active %}bg-success{% else %}bg-secondary{% endif %} p-2">
+                                {{ 'Active' if webhook.is_active else 'Inactive' }}
+                            </span>
+                            <form method="POST" action="{{ url_for('webhooks.edit', webhook_id=webhook.id) }}" 
+                                  class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="is_active" value="{{ not webhook.is_active }}">
+                                <button type="submit" class="btn btn-sm btn-outline-secondary ms-2">
+                                    {% if webhook.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">URL</label>
+                        <code class="d-block bg-light p-2 rounded mt-1">{{ webhook.url }}</code>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Secret Key</label>
+                        <div class="secret-box">
+                            {{ webhook.secret }}
+                        </div>
+                        <small class="text-muted">Use this to verify webhook signatures</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Events</label>
+                        <div class="mt-2">
+                            {% for event in webhook.events %}
+                                <span class="badge bg-secondary me-1 mb-1 p-2">
+                                    {% if event == '*' %}
+                                        <i class="fas fa-infinity me-1"></i> All Events
+                                    {% else %}
+                                        {{ event }}
+                                    {% endif %}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="fw-bold">Retry Count</label>
+                            <p>{{ webhook.retry_count }}</p>
+                        </div>
+                        <div class="col-6">
+                            <label class="fw-bold">Timeout</label>
+                            <p>{{ webhook.timeout }} seconds</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar me-2 text-success"></i>
+                    Statistics
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ webhook.total_delivered }}</div>
+                            <div class="stat-label">Delivered</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number" style="color: #f56565;">{{ webhook.total_failed }}</div>
+                            <div class="stat-label">Failed</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">
+                                {% set total = webhook.total_delivered + webhook.total_failed %}
+                                {% if total > 0 %}
+                                    {{ ((webhook.total_delivered / total) * 100)|round }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Success Rate</div>
+                        </div>
+                    </div>
+                    
+                    {% if webhook.last_triggered_at %}
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-clock me-2"></i>
+                        Last triggered: {{ webhook.last_triggered_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if webhook.last_error %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Last error: {{ webhook.last_error }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Delivery History -->
+        <div class="col-md-7">
+            <div class="detail-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>
+                        <i class="fas fa-history me-2 text-success"></i>
+                        Delivery History
+                    </span>
+                    <small class="text-muted">Last 10 deliveries</small>
+                </div>
+                <div class="card-body p-0">
+                    {% if deliveries %}
+                        {% for delivery in deliveries %}
+                        <div class="delivery-item {% if delivery.success %}delivery-success{% else %}delivery-failed{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>
+                                        <i class="fas fa-bolt me-1"></i>
+                                        {{ delivery.event_type }}
+                                    </strong>
+                                    <span class="badge {% if delivery.success %}bg-success{% else %}bg-danger{% endif %} ms-2">
+                                        Attempt {{ delivery.attempt }}
+                                    </span>
+                                </div>
+                                <small class="text-muted">
+                                    {{ delivery.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                                </small>
+                            </div>
+                            
+                            {% if delivery.response_status %}
+                            <div class="mt-2">
+                                <span class="badge bg-info me-2">HTTP {{ delivery.response_status }}</span>
+                                {% if delivery.response_body %}
+                                <button class="btn btn-sm btn-link" 
+                                        onclick="alert('Response: {{ delivery.response_body|escapejs }}')">
+                                    View Response
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            {% if delivery.error %}
+                            <div class="text-danger small mt-1">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                {{ delivery.error }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-clock text-muted fs-1 mb-3"></i>
+                            <p class="text-muted">No deliveries yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Signature Verification Guide -->
+            <div class="detail-card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt me-2 text-success"></i>
+                    Signature Verification
+                </div>
+                <div class="card-body">
+                    <p class="small">Verify webhook signatures using the secret:</p>
+                    
+                    <!-- Python Example -->
+                    <div class="bg-light p-3 rounded mb-3">
+                        <strong>Python Example:</strong>
+                        <pre class="mt-2 mb-0"><code>import hmac
+import hashlib
+
+signature = request.headers.get('X-Webhook-Signature')
+payload = request.get_data()
+
+expected = hmac.new(
+    b'{{ webhook.secret }}',
+    payload,
+    hashlib.sha256
+).hexdigest()
+
+if hmac.compare_digest(signature, expected):
+    # Valid webhook
+    pass</code></pre>
+                    </div>
+                    
+                    <!-- Node.js Example -->
+                    <div class="bg-light p-3 rounded">
+                        <strong>Node.js Example:</strong>
+                        <pre class="mt-2 mb-0"><code>const crypto = require('crypto');
+
+const signature = req.headers['x-webhook-signature'];
+const payload = JSON.stringify(req.body);
+
+const expected = crypto
+    .createHmac('sha256', '{{ webhook.secret }}')
+    .update(payload)
+    .digest('hex');
+
+if (signature === expected) {
+    // Valid webhook
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

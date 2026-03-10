@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Create Team - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .create-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #4a5568;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 12px;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .btn-create {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .btn-create:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .info-box {
+        background: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="create-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Create New Team</h1>
+        <p class="lead mb-0">Start collaborating with your team members</p>
+    </div>
+</section>
+
+<div class="container mb-5">
+    <div class="create-card">
+        <form method="POST" action="{{ url_for('team.create') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            
+            <!-- Team Name -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-tag me-2 text-primary"></i>
+                    Team Name
+                </label>
+                <input type="text" class="form-control" name="name" 
+                       placeholder="e.g., Engineering Team" required>
+                <small class="text-muted">Choose a unique name for your team</small>
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-3">
+                <label class="form-label">
+                    <i class="fas fa-align-left me-2 text-primary"></i>
+                    Description
+                </label>
+                <textarea class="form-control" name="description" rows="3" 
+                          placeholder="What is this team for?"></textarea>
+                <small class="text-muted">Optional: Add a brief description</small>
+            </div>
+            
+            <!-- Team Settings -->
+            <div class="info-box">
+                <h6 class="fw-bold mb-2">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>
+                    Team Settings
+                </h6>
+                <p class="small mb-0">
+                    As the team owner, you'll have full control over:
+                </p>
+                <ul class="small mt-2 mb-0">
+                    <li>Adding/removing members</li>
+                    <li>Managing roles and permissions</li>
+                    <li>Creating webhooks</li>
+                    <li>Viewing team logs</li>
+                </ul>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn-create mt-3">
+                <i class="fas fa-users me-2"></i>Create Team
+            </button>
+        </form>
+        
+        <!-- Back Link -->
+        <div class="text-center mt-3">
+            <a href="{{ url_for('team.dashboard') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Back to Teams
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

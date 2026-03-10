@@ -1,0 +1,189 @@
+/* Basic styles for Agent SDK Platform */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.alert {
+    border-radius: 8px;
+}
+
+footer {
+    margin-top: 2rem;
+    padding: 1rem 0;
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Custom Message Styles */
+.custom-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease;
+}
+
+.message-content {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-left: 4px solid;
+}
+
+.message-success .message-content {
+    border-left-color: #28a745;
+    background: #f0fff4;
+}
+
+.message-error .message-content {
+    border-left-color: #dc3545;
+    background: #fff5f5;
+}
+
+.message-warning .message-content {
+    border-left-color: #ffc107;
+    background: #fff9e6;
+}
+
+.message-info .message-content {
+    border-left-color: #17a2b8;
+    background: #e6f7ff;
+}
+
+.message-icon {
+    font-size: 1.5rem;
+    margin-right: 12px;
+}
+
+.message-text {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    padding: 0 5px;
+    margin-left: 10px;
+}
+
+.message-close:hover {
+    color: #666;
+}
+
+/* Team info alert styling */
+.team-info-alert {
+    margin-top: 5px !important;
+    margin-bottom: 20px !important;
+    border-radius: 10px;
+    border-left: 4px solid #0d6efd;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+    animation: slideDown 0.3s ease-out;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    border-left: 4px solid #0d6efd;
+}
+
+.team-info-alert .team-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.team-info-alert h5 {
+    color: #0d6efd;
+}
+
+.team-info-alert .btn-outline-primary {
+    border-width: 2px;
+    font-weight: 500;
+}
+
+.team-info-alert .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .team-info-alert {
+        margin: 10px 0;
+    }
+    
+    .team-info-alert .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    .team-info-alert .btn {
+        margin-top: 10px;
+        width: 100%;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .custom-message {
+        left: 20px;
+        right: 20px;
+        min-width: auto;
+    }
+}

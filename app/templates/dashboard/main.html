@@ -1,0 +1,899 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+<style>
+    /* Dashboard Header - Team Logs Style */
+    .dashboard-header {
+        background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        padding: 30px 0;
+        color: white;
+        margin-bottom: 30px;
+    }
+    
+    /* Stats Cards - Clean Design */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(66, 153, 225, 0.15);
+        border-color: #4299e1;
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .stat-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 5px;
+    }
+    
+    .stat-trend {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .trend-up { color: #48bb78; }
+    .trend-down { color: #f56565; }
+    
+    /* Quick Actions Cards */
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 30px 0;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-2px);
+        border-color: #4299e1;
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 28px;
+        color: white;
+    }
+    
+    .bg-team { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .bg-webhook { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
+    .bg-api { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
+    .bg-docs { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
+    
+    .action-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #2d3748;
+    }
+    
+    .action-desc {
+        font-size: 0.85rem;
+        color: #718096;
+        margin-bottom: 15px;
+    }
+    
+    .action-btn {
+        display: inline-block;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    
+    .btn-team { background: #667eea; color: white; }
+    .btn-webhook { background: #48bb78; color: white; }
+    .btn-api { background: #4299e1; color: white; }
+    .btn-docs { background: #ed8936; color: white; }
+    
+    .action-btn:hover {
+        transform: scale(1.05);
+        filter: brightness(110%);
+        color: white;
+    }
+    
+    /* Progress Bar */
+    .usage-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background: #edf2f7;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, #4299e1, #667eea);
+        border-radius: 4px;
+    }
+    
+    /* Charts Container */
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .chart-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+    
+    .chart-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .chart-header h6 {
+        margin: 0;
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .chart-body {
+        padding: 20px;
+    }
+    
+    /* Tables */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    
+    .table-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .table-responsive {
+        margin: 0;
+    }
+    
+    .table {
+        margin: 0;
+    }
+    
+    .table th {
+        border-top: none;
+        color: #718096;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Activity Timeline */
+    .activity-timeline {
+        padding: 10px 0;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 15px 20px;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-top: 6px;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .dot-error { background: #f56565; }
+    .dot-warning { background: #ecc94b; }
+    .dot-success { background: #48bb78; }
+    .dot-info { background: #4299e1; }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-title {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 3px;
+    }
+    
+    .activity-meta {
+        display: flex;
+        gap: 15px;
+        font-size: 0.8rem;
+        color: #a0aec0;
+    }
+    
+    .badge-env {
+        background: #e2e8f0;
+        color: #4a5568;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+    }
+    
+    .severity-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .severity-high { background: #f56565; color: white; }
+    .severity-medium { background: #ecc94b; color: black; }
+    .severity-low { background: #48bb78; color: white; }
+    .severity-info { background: #4299e1; color: white; }
+    
+    /* API Keys List */
+    .api-key-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #edf2f7;
+    }
+    
+    .api-key-item:last-child {
+        border-bottom: none;
+    }
+    
+    .api-key-name {
+        font-weight: 600;
+        color: #2d3748;
+    }
+    
+    .api-key-usage {
+        font-size: 0.8rem;
+        color: #718096;
+    }
+    
+    /* Date Range Picker */
+    .date-range-picker {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .date-range-picker:hover {
+        background: #f7fafc;
+        border-color: #4299e1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<section class="dashboard-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Dashboard
+                </h1>
+                <p class="mb-0">
+                    <i class="fas fa-user me-1"></i> {{ user.full_name or user.username }}
+                    <span class="mx-2">•</span>
+                    <i class="fas fa-chart-pie me-1"></i> Real-time analytics
+                </p>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-light dropdown-toggle date-range-picker" type="button" 
+                        id="dateRangeDropdown" data-bs-toggle="dropdown">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <span id="dateRangeText">Last 7 Days</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item date-range-option" href="#" data-days="1">Last 24 Hours</a></li>
+                    <li><a class="dropdown-item date-range-option" href="#" data-days="7">Last 7 Days</a></li>
+                    <li><a class="dropdown-item date-range-option" href="#" data-days="30">Last 30 Days</a></li>
+                    <li><a class="dropdown-item date-range-option" href="#" data-days="90">Last 90 Days</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" id="customRange">Custom Range</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container-fluid py-4">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <!-- Total Events -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Total Events</span>
+                <div class="stat-icon" style="background: rgba(66, 153, 225, 0.1); color: #4299e1;">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+            </div>
+            <div class="stat-value" id="totalEvents">{{ stats.total_events }}</div>
+            <div class="stat-trend" id="eventGrowth">
+                <i class="fas fa-arrow-up trend-up"></i>
+                <span>{{ stats.growth }}% from last period</span>
+            </div>
+        </div>
+        
+        <!-- Unique Instances -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Active Sources</span>
+                <div class="stat-icon" style="background: rgba(72, 187, 120, 0.1); color: #48bb78;">
+                    <i class="fas fa-server"></i>
+                </div>
+            </div>
+            <div class="stat-value" id="uniqueInstances">{{ stats.unique_instances }}</div>
+            <div class="stat-trend">
+                <i class="fas fa-circle text-success"></i>
+                <span>Unique instances</span>
+            </div>
+        </div>
+        
+        <!-- Error Rate -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Error Rate</span>
+                <div class="stat-icon" style="background: rgba(245, 101, 101, 0.1); color: #f56565;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+            <div class="stat-value" id="errorRate">{{ stats.error_rate }}%</div>
+            <div class="stat-trend" id="errorCount">
+                <i class="fas fa-exclamation-circle text-danger"></i>
+                <span>{{ stats.errors }} errors</span>
+            </div>
+        </div>
+        
+        <!-- Active Projects -->
+        <div class="stat-card">
+            <div class="stat-header">
+                <span class="stat-title">Active Projects</span>
+                <div class="stat-icon" style="background: rgba(237, 137, 54, 0.1); color: #ed8936;">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+            </div>
+            <div class="stat-value" id="activeProjects">{{ stats.projects|length }}</div>
+            <div class="stat-trend">
+                <i class="fas fa-cube text-warning"></i>
+                <span>Projects active</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions Grid -->
+    <div class="quick-actions-grid">
+        <div class="action-card">
+            <div class="action-icon bg-team">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="action-title">Team Collaboration</div>
+            <div class="action-desc">Work together with your team</div>
+            <a href="{{ url_for('team.dashboard') }}" class="action-btn btn-team">
+                Manage Teams
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon bg-webhook">
+                <i class="fas fa-plug"></i>
+            </div>
+            <div class="action-title">Webhooks</div>
+            <div class="action-desc">Integrate with other services</div>
+            <a href="{{ url_for('webhooks.list_webhooks') }}" class="action-btn btn-webhook">
+                Configure
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon bg-api">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="action-title">API Keys</div>
+            <div class="action-desc">Create and manage API keys</div>
+            <a href="{{ url_for('api_keys.create_key') }}" class="action-btn btn-api">
+                Create Key
+            </a>
+        </div>
+        
+        <div class="action-card">
+            <div class="action-icon bg-docs">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="action-title">Documentation</div>
+            <div class="action-desc">Read the docs and guides</div>
+            <a href="{{ url_for('documentation.index') }}" class="action-btn btn-docs">
+                View Docs
+            </a>
+        </div>
+    </div>
+    
+    <!-- Usage Progress -->
+    <div class="usage-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h6 class="fw-bold mb-0">
+                <i class="fas fa-chart-line me-2 text-primary"></i>
+                Monthly Usage
+            </h6>
+            <span class="text-muted">
+                <span id="currentUsage">{{ stats.total_events }}</span> / {{ user.monthly_log_limit }} events
+            </span>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" 
+                 style="width: {{ usage_percentage|int }}%"
+                 aria-valuenow="{{ usage_percentage }}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="100">
+            </div>
+        </div>
+        {% if usage_percentage > 80 %}
+            <small class="text-warning mt-2 d-block">
+                <i class="fas fa-exclamation-triangle me-1"></i>
+                You're approaching your monthly limit. <a href="#">Upgrade now</a>
+            </small>
+        {% endif %}
+    </div>
+    
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <!-- Timeline Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h6>Event Timeline</h6>
+                <span class="badge bg-primary">Last {{ currentDays }} days</span>
+            </div>
+            <div class="chart-body">
+                <canvas id="timelineChart" height="300"></canvas>
+            </div>
+        </div>
+        
+        <!-- Distribution Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h6>Event Distribution</h6>
+            </div>
+            <div class="chart-body">
+                <canvas id="distributionChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Second Row Charts -->
+    <div class="charts-grid mt-4">
+        <!-- Severity Distribution -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h6>Severity Distribution</h6>
+                <span class="badge bg-info">Last 7 days</span>
+            </div>
+            <div class="chart-body">
+                <canvas id="severityChart" height="250"></canvas>
+            </div>
+        </div>
+        
+        <!-- Top Pages Table -->
+        <div class="table-card">
+            <div class="table-header">
+                <h6>Top Pages</h6>
+                <a href="{{ url_for('logs.view_logs') }}" class="btn btn-sm btn-outline-primary">
+                    View All
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Page URL</th>
+                            <th>Views</th>
+                            <th>Last Seen</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topPagesTable">
+                        {% for page in stats.top_pages or [] %}
+                        <tr>
+                            <td class="text-truncate" style="max-width: 200px;" title="{{ page.url }}">
+                                {{ page.url }}
+                            </td>
+                            <td><span class="badge bg-primary">{{ page.count }}</span></td>
+                            <td><small>{{ page.last_seen|timesince }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Activity and API Keys -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="table-card">
+                <div class="table-header">
+                    <h6>Recent Activity</h6>
+                    <a href="{{ url_for('logs.view_logs') }}" class="btn btn-sm btn-outline-primary">
+                        View All <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+                <div class="activity-timeline">
+                    {% for log in recent_logs %}
+                    <div class="activity-item">
+                        <div class="activity-dot dot-{{ log.first_event_severity|lower }}"></div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ log.project }}</div>
+                            <div class="activity-meta">
+                                <span><i class="fas fa-clock me-1"></i>{{ log.received_at|timesince }}</span>
+                                <span class="badge-env">{{ log.environment }}</span>
+                                <span class="severity-badge severity-{{ log.first_event_severity|lower }}">
+                                    {{ log.first_event_severity }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clock text-muted fa-3x mb-3"></i>
+                        <p class="text-muted">No recent activity</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="table-card">
+                <div class="table-header">
+                    <h6>API Keys</h6>
+                    <a href="{{ url_for('api_keys.manage_keys') }}" class="btn btn-sm btn-outline-primary">
+                        Manage
+                    </a>
+                </div>
+                <div class="p-3">
+                    {% if api_keys %}
+                        {% for key in api_keys[:3] %}
+                        <div class="api-key-item">
+                            <div>
+                                <div class="api-key-name">{{ key.name }}</div>
+                                <div class="api-key-usage">{{ key.total_requests }} requests</div>
+                            </div>
+                            <span class="badge {% if key.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                {{ 'Active' if key.is_active else 'Inactive' }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                        {% if api_keys|length > 3 %}
+                        <div class="text-center mt-2">
+                            <small class="text-muted">+{{ api_keys|length - 3 }} more keys</small>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted text-center py-3">No API keys yet</p>
+                        <a href="{{ url_for('api_keys.create_key') }}" class="btn btn-primary btn-sm w-100">
+                            Create Your First Key
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Quick Actions Mini -->
+            <div class="table-card mt-4">
+                <div class="table-header">
+                    <h6>Quick Actions</h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('api_keys.create_key') }}" class="btn btn-outline-primary text-start">
+                            <i class="fas fa-key me-2"></i>Create New API Key
+                        </a>
+                        <a href="#" class="btn btn-outline-success text-start" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="fas fa-download me-2"></i>Export Logs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Logs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <select class="form-select" name="range">
+                            <option value="7">Last 7 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="custom">Custom range</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Format</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" id="formatJSON" value="json" checked>
+                            <label class="form-check-label" for="formatJSON">JSON</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" id="formatCSV" value="csv">
+                            <label class="form-check-label" for="formatCSV">CSV</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportLogs()">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// [Keep ALL your existing JavaScript code exactly as it was]
+// The JavaScript remains unchanged - only the HTML/CSS changed
+
+let timelineChart, distributionChart, severityChart;
+let currentDays = 7;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+    setupEventListeners();
+    startRealTimeUpdates();
+});
+
+function initCharts() {
+    const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+    timelineChart = new Chart(timelineCtx, {
+        type: 'line',
+        data: { labels: [], datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+    
+    const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+    distributionChart = new Chart(distributionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+    
+    const severityCtx = document.getElementById('severityChart').getContext('2d');
+    severityChart = new Chart(severityCtx, {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Events',
+                data: [],
+                backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#17a2b8']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+    
+    loadDashboardData(currentDays);
+}
+
+function setupEventListeners() {
+    document.querySelectorAll('.date-range-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            const days = parseInt(this.dataset.days);
+            currentDays = days;
+            document.getElementById('dateRangeText').textContent = this.textContent;
+            loadDashboardData(days);
+        });
+    });
+    
+    document.getElementById('customRange').addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Custom range coming soon!');
+    });
+}
+
+function loadDashboardData(days) {
+    Promise.all([
+        fetch(`/api/dashboard/stats?days=${days}`).then(r => r.json()),
+        fetch(`/api/dashboard/timeseries?days=${days}`).then(r => r.json()),
+        fetch(`/api/dashboard/events-by-type?days=${days}`).then(r => r.json()),
+        fetch(`/api/dashboard/severity-distribution?days=${days}`).then(r => r.json()),
+        fetch(`/api/dashboard/top-pages?days=${days}`).then(r => r.json())
+    ]).then(([stats, timeseries, eventTypes, severity, topPages]) => {
+        updateStats(stats);
+        updateTimelineChart(timeseries);
+        updateDistributionChart(eventTypes);
+        updateSeverityChart(severity);
+        updateTopPages(topPages);
+    }).catch(error => {
+        console.error('Error loading dashboard data:', error);
+    });
+}
+
+function updateStats(stats) {
+    document.getElementById('totalEvents').textContent = stats.total_events.toLocaleString();
+    document.getElementById('uniqueInstances').textContent = stats.unique_instances.toLocaleString();
+    document.getElementById('errorRate').textContent = stats.error_rate + '%';
+    document.getElementById('errorCount').textContent = stats.errors + ' errors';
+    document.getElementById('activeProjects').textContent = Object.keys(stats.projects).length;
+    
+    const growthEl = document.getElementById('eventGrowth');
+    const growth = stats.growth;
+    growthEl.innerHTML = `<i class="fas fa-arrow-${growth >= 0 ? 'up' : 'down'} trend-${growth >= 0 ? 'up' : 'down'}"></i> <span>${Math.abs(growth)}% from last period</span>`;
+}
+
+function updateTimelineChart(data) {
+    timelineChart.data.labels = data.labels;
+    timelineChart.data.datasets = data.datasets;
+    timelineChart.update();
+}
+
+function updateDistributionChart(data) {
+    distributionChart.data.labels = data.labels;
+    distributionChart.data.datasets[0].data = data.data;
+    distributionChart.update();
+}
+
+function updateSeverityChart(data) {
+    severityChart.data.labels = data.labels;
+    severityChart.data.datasets[0].data = data.data;
+    severityChart.data.datasets[0].backgroundColor = data.colors;
+    severityChart.update();
+}
+
+function updateTopPages(pages) {
+    const tbody = document.querySelector('#topPagesTable');
+    tbody.innerHTML = '';
+    
+    pages.forEach(page => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td class="text-truncate" style="max-width: 200px;" title="${page.url}">${page.url}</td>
+            <td><span class="badge bg-primary">${page.count.toLocaleString()}</span></td>
+            <td><small>${timeSince(new Date(page.last_seen))}</small></td>
+        `;
+    });
+}
+
+function startRealTimeUpdates() {
+    setInterval(() => {
+        fetch('/profile/update-usage')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('currentUsage').textContent = data.current.toLocaleString();
+                document.querySelector('.progress-bar').style.width = data.percentage + '%';
+            });
+    }, 30000);
+}
+
+function exportLogs() {
+    const form = document.getElementById('exportForm');
+    const formData = new FormData(form);
+    window.location.href = `/logs/export?range=${formData.get('range')}&format=${formData.get('format')}`;
+}
+
+function timeSince(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + ' years ago';
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + ' months ago';
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + ' days ago';
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + ' hours ago';
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + ' minutes ago';
+    return Math.floor(seconds) + ' seconds ago';
+}
+</script>
+{% endblock %}

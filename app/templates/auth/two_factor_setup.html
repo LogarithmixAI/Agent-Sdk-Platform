@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+
+{% block title %}Setup Two-Factor Authentication - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .twofa-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .twofa-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .twofa-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2d3748;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+    }
+    
+    .qr-container {
+        background: #f7fafc;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+    
+    .qr-code {
+        max-width: 200px;
+        margin: 0 auto 20px;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .qr-code img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .manual-secret {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 1.1rem;
+        margin: 20px 0;
+        text-align: center;
+        letter-spacing: 2px;
+    }
+    
+    .setup-steps {
+        margin: 25px 0;
+        padding: 0;
+        list-style: none;
+    }
+    
+    .setup-steps li {
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .setup-steps li:last-child {
+        border-bottom: none;
+    }
+    
+    .step-number {
+        width: 30px;
+        height: 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: 600;
+    }
+    
+    .step-text {
+        flex: 1;
+        color: #4a5568;
+    }
+    
+    .verification-input {
+        max-width: 200px;
+        text-align: center;
+        font-size: 1.5rem;
+        letter-spacing: 5px;
+        margin: 0 auto;
+    }
+    
+    .btn-verify {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .btn-verify:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-copy {
+        background: #48bb78;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        margin-left: 10px;
+        transition: all 0.3s;
+    }
+    
+    .btn-copy:hover {
+        background: #38a169;
+    }
+    
+    .info-box {
+        background: #ebf8ff;
+        border-left: 4px solid #4299e1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+    
+    .info-box i {
+        color: #4299e1;
+    }
+    
+    .warning-box {
+        background: #fff5f5;
+        border-left: 4px solid #f56565;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+    }
+    
+    .warning-box i {
+        color: #f56565;
+    }
+    
+    .app-icon {
+        display: inline-block;
+        margin: 10px;
+        text-align: center;
+    }
+    
+    .app-icon i {
+        font-size: 40px;
+        color: #667eea;
+    }
+    
+    .app-icon span {
+        display: block;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="twofa-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Setup Two-Factor Authentication</h1>
+        <p class="lead mb-0">Add an extra layer of security to your account</p>
+    </div>
+</section>
+
+<!-- Main Content -->
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            
+            <!-- Step 1: Install App -->
+            <div class="twofa-card">
+                <h3 class="twofa-title">
+                    <span class="step-number me-2">1</span>
+                    Install an Authenticator App
+                </h3>
+                
+                <p class="text-muted mb-4">Download and install one of these authenticator apps on your phone:</p>
+                
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="app-icon">
+                            <i class="fab fa-google"></i>
+                            <span>Google Authenticator</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="app-icon">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Microsoft Authenticator</span>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="app-icon">
+                            <i class="fas fa-lock"></i>
+                            <span>Authy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Scan QR Code -->
+            <div class="twofa-card">
+                <h3 class="twofa-title">
+                    <span class="step-number me-2">2</span>
+                    Scan QR Code
+                </h3>
+                
+                <div class="qr-container">
+                    <div class="qr-code">
+                        <img src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code">
+                    </div>
+                    
+                    <div class="info-box">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Can't scan the QR code?</strong> Use this secret key instead:
+                    </div>
+                    
+                    <div class="manual-secret" id="secretKey">
+                        {{ secret }}
+                        <button class="btn-copy" onclick="copySecret()">
+                            <i class="fas fa-copy me-1"></i>Copy
+                        </button>
+                    </div>
+                    
+                    <p class="text-muted small mt-3">
+                        <i class="fas fa-clock me-1"></i>
+                        This secret key will change if you regenerate it
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Step 3: Verify Code -->
+            <div class="twofa-card">
+                <h3 class="twofa-title">
+                    <span class="step-number me-2">3</span>
+                    Verify Setup
+                </h3>
+                
+                <div class="info-box mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Enter the 6-digit verification code from your authenticator app to confirm setup.
+                </div>
+                
+                <form method="POST" action="{{ url_for('auth.two_factor_setup') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Verification Code</label>
+                                <input type="text" class="form-control verification-input" 
+                                       name="token" maxlength="6" pattern="[0-9]{6}" 
+                                       placeholder="000000" required>
+                                <div class="form-text text-center">
+                                    Open your authenticator app and enter the 6-digit code
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn-verify px-5">
+                                    <i class="fas fa-check-circle me-2"></i>Verify & Enable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Recovery Codes (Optional) -->
+            <div class="twofa-card">
+                <h3 class="twofa-title">Backup & Recovery</h3>
+                
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Save these recovery codes in a secure place. They can be used to access your account if you lose your phone.
+                </div>
+                
+                <div class="row g-3 mt-3">
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">ABC-123-DEF-456</code>
+                    </div>
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">GHI-789-JKL-012</code>
+                    </div>
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">MNO-345-PQR-678</code>
+                    </div>
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">STU-901-VWX-234</code>
+                    </div>
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">YZA-567-BCD-890</code>
+                    </div>
+                    <div class="col-md-4">
+                        <code class="d-block bg-light p-2 text-center">EFG-123-HIJ-456</code>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary btn-sm" onclick="downloadRecoveryCodes()">
+                        <i class="fas fa-download me-2"></i>Download Recovery Codes
+                    </button>
+                </div>
+            </div>
+            
+            <!-- FAQ -->
+            <div class="twofa-card">
+                <h3 class="twofa-title">Frequently Asked Questions</h3>
+                
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                What is Two-Factor Authentication?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Two-factor authentication adds an extra layer of security to your account. After entering your password, you'll also need to enter a verification code from your phone, making it much harder for unauthorized users to access your account.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                What if I lose my phone?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Use your recovery codes to regain access to your account. Store them securely. If you lose both your phone and recovery codes, you'll need to contact support and verify your identity.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                Can I use multiple devices?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! You can scan the same QR code on multiple devices, or manually enter the secret key. All devices will generate the same verification codes.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                How do I disable 2FA later?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Go to your profile settings and click "Disable 2FA". You'll need to verify with a current 2FA code to disable it.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back to Profile -->
+            <div class="text-center mt-4">
+                <a href="{{ url_for('auth.profile') }}" class="text-decoration-none">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                </a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copySecret() {
+    const secret = document.getElementById('secretKey').innerText.split('\n')[0].trim();
+    navigator.clipboard.writeText(secret).then(() => {
+        const btn = document.querySelector('.btn-copy');
+        btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-copy me-1"></i>Copy';
+        }, 2000);
+    });
+}
+
+function downloadRecoveryCodes() {
+    const codes = [
+        'ABC-123-DEF-456',
+        'GHI-789-JKL-012',
+        'MNO-345-PQR-678',
+        'STU-901-VWX-234',
+        'YZA-567-BCD-890',
+        'EFG-123-HIJ-456'
+    ];
+    
+    const content = 'Agent SDK Platform - 2FA Recovery Codes\n';
+    content += '====================================\n\n';
+    content += 'Store these codes securely. Each code can be used only once.\n\n';
+    
+    codes.forEach((code, i) => {
+        content += `${i+1}. ${code}\n`;
+    });
+    
+    content += '\nGenerated on: ' + new Date().toLocaleString();
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'agentsdk-2fa-recovery-codes.txt';
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
+// Auto-submit when 6 digits entered
+document.querySelector('input[name="token"]').addEventListener('input', function(e) {
+    if (this.value.length === 6) {
+        // Optionally auto-submit
+        // this.form.submit();
+    }
+});
+
+// Restrict to numbers only
+document.querySelector('input[name="token"]').addEventListener('keypress', function(e) {
+    const char = String.fromCharCode(e.which);
+    if (!/[0-9]/.test(char)) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

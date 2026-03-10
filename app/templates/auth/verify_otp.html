@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP - Agent SDK Platform{% endblock %}
+
+{% block extra_css %}
+<style>
+    .otp-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 40px 0;
+        color: white;
+        margin-bottom: 40px;
+    }
+    
+    .otp-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 30px;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+    
+    .otp-inputs {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin: 30px 0;
+    }
+    
+    .otp-input {
+        width: 60px;
+        height: 70px;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        transition: all 0.3s;
+    }
+    
+    .otp-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+    
+    .timer {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #667eea;
+    }
+    
+    .resend-link {
+        color: #667eea;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .resend-link:hover {
+        text-decoration: underline;
+    }
+    
+    .resend-link.disabled {
+        color: #999;
+        pointer-events: none;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="otp-header">
+    <div class="container text-center">
+        <h1 class="display-5 fw-bold mb-3">Verify Your Email</h1>
+        <p class="lead mb-0">Enter the 6-digit OTP sent to {{ email }}</p>
+    </div>
+</section>
+
+<!-- OTP Form -->
+<div class="container mb-5">
+    <div class="otp-card">
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('auth.verify_otp') }}" id="otpForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="email" value="{{ email }}">
+            
+            <!-- OTP Input Boxes -->
+            <div class="otp-inputs">
+                <input type="text" class="otp-input" id="otp1" maxlength="1" pattern="[0-9]" inputmode="numeric" autofocus>
+                <input type="text" class="otp-input" id="otp2" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp3" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp4" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp5" maxlength="1" pattern="[0-9]" inputmode="numeric">
+                <input type="text" class="otp-input" id="otp6" maxlength="1" pattern="[0-9]" inputmode="numeric">
+            </div>
+            
+            <!-- Hidden input for full OTP -->
+            <input type="hidden" name="otp" id="fullOtp">
+            
+            <!-- Timer -->
+            <div class="text-center mb-3">
+                <span class="timer" id="timer">10:00</span>
+                <span class="text-muted"> remaining</span>
+            </div>
+            
+            <!-- Resend Link -->
+            <div class="text-center mb-4">
+                <span class="text-muted">Didn't receive OTP? </span>
+                <a href="#" class="resend-link" id="resendLink" onclick="resendOtp()">Resend</a>
+            </div>
+            
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-2" id="verifyBtn">
+                <i class="fas fa-check-circle me-2"></i>Verify Email
+            </button>
+        </form>
+        
+        <!-- Back to Register -->
+        <div class="text-center mt-3">
+            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Back to Register
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// OTP input handling
+const otpInputs = document.querySelectorAll('.otp-input');
+const fullOtp = document.getElementById('fullOtp');
+let timerInterval;
+let timeLeft = 600; // 10 minutes in seconds
+
+// Auto-focus next input
+otpInputs.forEach((input, index) => {
+    input.addEventListener('input', function() {
+        // Only allow numbers
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        if (this.value.length === 1 && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+        }
+        
+        updateFullOtp();
+    });
+    
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && index > 0) {
+            otpInputs[index - 1].focus();
+        }
+    });
+    
+    // Paste handling
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const paste = e.clipboardData.getData('text');
+        const numbers = paste.replace(/[^0-9]/g, '').split('');
+        
+        numbers.forEach((num, i) => {
+            if (i < otpInputs.length) {
+                otpInputs[i].value = num;
+            }
+        });
+        
+        if (numbers.length > 0) {
+            otpInputs[Math.min(numbers.length, otpInputs.length - 1)].focus();
+        }
+        
+        updateFullOtp();
+    });
+});
+
+function updateFullOtp() {
+    let otp = '';
+    otpInputs.forEach(input => otp += input.value);
+    fullOtp.value = otp;
+    
+    // Auto-submit when all 6 digits entered
+    if (otp.length === 6) {
+        document.getElementById('verifyBtn').click();
+    }
+}
+
+// Timer
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('timer').textContent = '00:00';
+            document.getElementById('resendLink').classList.remove('disabled');
+            document.getElementById('resendLink').style.pointerEvents = 'auto';
+            alert('OTP expired. Please request a new one.');
+        } else {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    }, 1000);
+}
+
+// Resend OTP
+function resendOtp() {
+    if (timeLeft > 0 && timeLeft < 600) {
+        if (!confirm('Are you sure you want to resend OTP? The previous OTP will expire.')) {
+            return;
+        }
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{{ url_for('auth.resend_otp') }}";
+    
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrf_token';
+    csrf.value = "{{ csrf_token() }}";
+    
+    const email = document.createElement('input');
+    email.type = 'hidden';
+    email.name = 'email';
+    email.value = "{{ email }}";
+    
+    form.appendChild(csrf);
+    form.appendChild(email);
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Start timer on page load
+startTimer();
+
+// Prevent form submit on Enter (use button click instead)
+document.getElementById('otpForm').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('verifyBtn').click();
+    }
+});
+</script>
+{% endblock %}
