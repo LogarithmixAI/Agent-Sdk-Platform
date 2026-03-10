@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify
 from flask_login import current_user
 
 bp = Blueprint('main', __name__)
