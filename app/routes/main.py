@@ -27,3 +27,12 @@ def about():
 def contact():
     """Contact page"""
     return render_template('contact.html', title='Contact')
+
+@bp.route('/health', methods=['GET'])
+def health():
+    """Health check endpoint for monitoring"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'version': '1.0.0'
+    })
