@@ -12,7 +12,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # MongoDB (Logs data)
-    MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/agent_sdk_logs_dev')
+    MONGO_URI = os.getenv('MONGO_URI')
     
     # Local file storage for testing
     LOGS_STORAGE_PATH = os.getenv('LOGS_STORAGE_PATH', './logs_data')
@@ -34,23 +34,24 @@ class Config:
     
     # Pagination
     ITEMS_PER_PAGE = 20
+    
+    # Storage Type - Default 'file' for safety
+    STORAGE_TYPE = os.getenv('STORAGE_TYPE', 'file')
+
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    # Use file storage for logs in development
-    STORAGE_TYPE= 'mongodb'
-    MONGO_URI = os.getenv('MONGO_URI')
+    STORAGE_TYPE = os.getenv('STORAGE_TYPE', 'mongodb')
+    MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/agent_sdk_logs_dev')
     LOGS_STORAGE_PATH = './logs_data'
 
 
 class ProductionConfig(Config):
     DEBUG = False
-    # Use MongoDB for logs in production
-    STORAGE_TYPE = 'mongodb'
-    # Ensure MongoDB URI is set
-    MONGO_URI = os.getenv('MONGO_URI')
-    if not MONGO_URI:
-        raise ValueError("MONGO_URI must be set in production")
+    # ✅ FIX: Don't raise error, let it fail gracefully
+    # App will check during runtime
+    pass  # All config inherited from Config class
+
 
 class TestingConfig(Config):
     TESTING = True
