@@ -20,7 +20,11 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 REPLAY_CACHE = set()
 MAX_CACHE_SIZE = 10000
 
-
+@bp.route('/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({'status': 'healthy'}), 200
+    
 # @bp.before_request
 # def before_request():
 #     """Validate API key before processing request"""
