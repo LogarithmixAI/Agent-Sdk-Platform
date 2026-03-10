@@ -20,10 +20,6 @@ bp = Blueprint('api', __name__, url_prefix='/api')
 REPLAY_CACHE = set()
 MAX_CACHE_SIZE = 10000
 
-@bp.route('/health')
-def health():
-    """Health check endpoint"""
-    return jsonify({'status': 'healthy'}), 200
     
 # @bp.before_request
 # def before_request():
@@ -317,17 +313,6 @@ def ingest_logs():
             'error': 'Internal server error',
             'code': 'SERVER_ERROR'
         }), 500
-
-
-@bp.route('/health', methods=['GET'])
-def health():
-    """Health check endpoint for monitoring"""
-    return jsonify({
-        'status': 'healthy',
-        'timestamp': datetime.utcnow().isoformat(),
-        'version': '1.0.0',
-        'mongodb': 'connected' if log_service.mongo else 'disconnected'
-    })
 
 
 @bp.route('/logs/batch', methods=['POST'])
