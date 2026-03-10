@@ -1,0 +1,78 @@
+# render.yaml - Complete configuration for Agent SDK Platform
+
+services:
+  - type: web
+    name: agent-sdk-platform
+    runtime: python
+    region: singapore  # or mumbai (ap-south-1)
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app
+    healthCheckPath: /health
+    envVars:
+      # Flask Configuration
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates secure key
+      
+      # Storage Type
+      - key: STORAGE_TYPE
+        value: mongodb
+      
+      # API Settings
+      - key: API_RATE_LIMIT
+        value: 100
+      - key: API_KEY_LENGTH
+        value: 32
+      
+      # Email Configuration
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      
+      # MongoDB Configuration
+      - key: MONGO_DB
+        sync: false  # To be set manually in dashboard
+      - key: MONGO_URI
+        sync: false  # To be set manually in dashboard
+      
+      # PostgreSQL Configuration
+      - key: DATABASE_URL
+        sync: false  # To be set manually in dashboard
+      
+      # Email Credentials (Sensitive)
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        sync: false
+      
+      # Twilio (Optional - if used)
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+
+  # Optional: Redis service (if you need Celery/Queue)
+  - type: redis
+    name: agent-sdk-redis
+    plan: free
+    region: singapore
+    ipAllowList: []  # Allows only internal connections
+
+databases:
+  # PostgreSQL for user data (optional - if you don't want to use Supabase)
+  - name: agent-sdk-db
+    plan: free
+    region: singapore
+    databaseName: agent_sdk
+    user: agent_sdk_user
+    ipAllowList: []  # Allows only internal connections
