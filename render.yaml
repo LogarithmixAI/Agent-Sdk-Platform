@@ -6,7 +6,7 @@ services:
     runtime: python
     region: singapore  # or mumbai (ap-south-1)
     plan: free
-    branch: main
+    branch: master
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn wsgi:app
     healthCheckPath: /health
