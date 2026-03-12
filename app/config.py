@@ -27,6 +27,10 @@ class Config:
     MAIL_USE_TLS = os.getenv('MAIL_USE_TLS', 'True').lower() == 'true'
     MAIL_USERNAME = os.getenv('MAIL_USERNAME')
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
+
+    #brevo api_key for email
+    BREVO_API_KEY = os.getenv('BREVO_API_KEY')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
     
     # API Settings
     API_RATE_LIMIT = int(os.getenv('API_RATE_LIMIT', 100))

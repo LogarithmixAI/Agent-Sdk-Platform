@@ -97,7 +97,7 @@ def login():
         if user and user.check_password(form.password.data):
             if not user.is_verified:
                 flash('Please verify your email address before logging in.', 'warning')
-                return redirect(url_for('auth.resend_verification', email=user.email))
+                return redirect(url_for('auth.resend_verification'))
             
             if not user.is_active:
                 flash('Your account has been deactivated. Please contact support.', 'danger')
@@ -268,8 +268,8 @@ def resend_verification():
         
         # Send verification email
         try:
-            send_verification_email(user)
-            print(f"✅ Verification email sent to: {email}")
+            response = send_verification_email(user)
+            print(f"✅ Verification email sent to: {email}  | response :{response}")
             
             # Success page dikhao - template mein success message ke saath
             return render_template('auth/resend_verification.html', email_sent=True, email=email)

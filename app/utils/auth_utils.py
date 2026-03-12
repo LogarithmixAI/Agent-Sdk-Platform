@@ -10,6 +10,8 @@ import base64
 from flask import render_template
 from datetime import datetime, timedelta
 import secrets
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
 
 def generate_confirmation_token(email):
     """Generate email confirmation token"""
@@ -57,20 +59,41 @@ def send_async_email(app, msg):
             print(f"❌ Error sending email: {str(e)}")
 
 def send_email(subject, recipients, text_body, html_body=None, sender=None):
-    """Send email using Flask-Mail"""
+    """Send email using Brevo API"""
     try:
-        # Agar sender nahi diya to config se lo
+
+        # Sender agar pass nahi hua
         if not sender:
-            sender = current_app.config.get('MAIL_DEFAULT_SENDER') or current_app.config.get('MAIL_USERNAME')
-        
-        # Sender ke saath message banao
-        msg = Message(subject, recipients=recipients, sender=sender)
-        msg.body = text_body
-        msg.html = html_body
-        
-        # Send asynchronously
-        Thread(target=send_async_email, args=(current_app._get_current_object(), msg)).start()
-        return True, "Email queued for sending"
+            sender = current_app.config.get("MAIL_DEFAULT_SENDER")
+
+        # Brevo configuration
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key['api-key'] = current_app.config.get("BREVO_API_KEY")
+
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
+
+        # Recipients format convert
+        to_list = [{"email": email} for email in recipients]
+
+        # Email content
+        email = sib_api_v3_sdk.SendSmtpEmail(
+            to=to_list,
+            sender={"email": sender},
+            subject=subject,
+            html_content=html_body if html_body else f"<pre>{text_body}</pre>"
+        )
+
+        # Send email
+        response = api_instance.send_transac_email(email)
+
+        return True, response
+
+    except ApiException as e:
+        print(f"❌ Brevo API error: {str(e)}")
+        return False, str(e)
+
     except Exception as e:
         print(f"❌ Error in send_email: {str(e)}")
         return False, str(e)
@@ -103,7 +126,8 @@ def send_verification_email(user):
         
         If you didn't register for an account, please ignore this email.
         '''
-        
+
+
         success, message = send_email(
             subject='Verify Your Email - Agent SDK Platform',
             recipients=[user.email],
