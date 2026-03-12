@@ -52,6 +52,9 @@ services:
         sync: false
       - key: MAIL_DEFAULT_SENDER
         sync: false
+      - key : BREVO_API_KEY
+        sync: false
+
       
       # Twilio (Optional - if used)
       - key: TWILIO_ACCOUNT_SID

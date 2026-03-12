@@ -28,12 +28,12 @@
                         </div>
                         
                         <form method="POST" action="{{ url_for('auth.resend_verification') }}">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email Address</label>
                                 <input type="email" class="form-control" id="email" name="email" 
-                                       placeholder="Enter your registered email" required>
+                                placeholder="Enter your registered email" required>
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             </div>
                             
                             <div class="d-grid gap-2">
