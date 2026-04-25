@@ -25,6 +25,8 @@ jobs:
         pip install -r requirements.txt
 
     - name: Basic app check
+      env:
+        FLASK_ENV: testing
       run: |
         python -c "import wsgi"
 
