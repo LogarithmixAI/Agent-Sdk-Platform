@@ -41,6 +41,9 @@ def create_app(config_class=None):
     # Load configuration
     if config_class:
         app.config.from_object(config_class)
+        env = os.getenv('FLASK_ENV', 'development')
+        if env == "production" and not app.config.get("MONGO_URI"):
+            raise ValueError("MONGO_URI must be set in production")
     else:
         from app.config import config
         env = os.getenv('FLASK_ENV', 'development')

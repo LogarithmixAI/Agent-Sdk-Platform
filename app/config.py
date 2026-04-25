@@ -53,8 +53,6 @@ class ProductionConfig(Config):
     STORAGE_TYPE = 'mongodb'
     # Ensure MongoDB URI is set
     MONGO_URI = os.getenv('MONGO_URI')
-    if not MONGO_URI:
-        raise ValueError("MONGO_URI must be set in production")
 
 class TestingConfig(Config):
     TESTING = True
