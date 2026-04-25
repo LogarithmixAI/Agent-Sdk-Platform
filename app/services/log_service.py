@@ -746,12 +746,18 @@ class LogService:
                     data = result[0]
                     
                     # Get values with fallbacks
-                    totals = data.get('totals', [{}])[0]
-                    total_events = totals.get('total_events', 0)
                     
-                    unique_instances = data.get('unique_instances', [{}])[0].get('count', 0)
-                    unique_traces = data.get('unique_traces', [{}])[0].get('count', 0)
-                    errors = data.get('errors', [{}])[0].get('count', 0)
+                    totals = data.get('totals', [{}])
+                    total_events = totals_list[0].get('total_events', 0) if totals_list else 0
+
+                    ui_list = data.get('unique_instances', [])
+                    unique_instances = ui_list[0].get('count', 0) if ui_list else 0
+
+                    ut_list = data.get('unique_traces', [])
+                    unique_traces = ut_list[0].get('count', 0) if ut_list else 0
+
+                    err_list = data.get('errors', [])
+                    errors = err_list[0].get('count', 0) if err_list else 0
                     
                     # Calculate error rate
                     error_rate = round((errors / max(total_events, 1)) * 100, 2)
