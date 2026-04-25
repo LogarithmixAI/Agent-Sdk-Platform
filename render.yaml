@@ -3,12 +3,10 @@
 services:
   - type: web
     name: agent-sdk-platform
-    runtime: python
+    runtime: docker
     region: singapore  # or mumbai (ap-south-1)
     plan: free
     branch: master
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn wsgi:app
     healthCheckPath: /health
     envVars:
       # Flask Configuration
