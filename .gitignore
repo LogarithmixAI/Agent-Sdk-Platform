@@ -44,3 +44,8 @@ htmlcov/
 # Production
 staticfiles/
 media/
+
+# Local / test files
+run.py
+test_notebook.ipynb
+*.ipynb

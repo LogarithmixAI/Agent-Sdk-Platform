@@ -1,0 +1,33 @@
+name: AIOps CI Pipeline
+
+on:
+  push:
+    branches: [ "master", "main", "featured" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Basic app check
+      run: |
+        python -c "import wsgi"
+
+    - name: Docker build test
+      run: |
+        docker build -t aiops-test .
