@@ -748,7 +748,7 @@ class LogService:
                     # Get values with fallbacks
                     
                     totals = data.get('totals', [{}])
-                    total_events = totals_list[0].get('total_events', 0) if totals_list else 0
+                    total_events = totals[0].get('total_events', 0) if totals else 0
 
                     ui_list = data.get('unique_instances', [])
                     unique_instances = ui_list[0].get('count', 0) if ui_list else 0
