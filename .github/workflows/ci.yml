@@ -9,7 +9,8 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    env:
+      FLASK_ENV: testing
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -25,8 +26,7 @@ jobs:
         pip install -r requirements.txt
 
     - name: Basic app check
-      env:
-        FLASK_ENV: testing
+    
       run: |
         python -c "import wsgi"
 
